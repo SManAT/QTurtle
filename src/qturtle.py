@@ -4,15 +4,24 @@ from pathlib import Path
 # Add src/ to path so Ui_MainWindow.py can import editor
 sys.path.insert(0, str(Path(__file__).parent))
 
-from PySide6.QtGui import QIcon, QPixmap, QFont, QTextCharFormat, QColor
+from PySide6.QtGui import QIcon, QPixmap, QFont, QScreen, QTextCharFormat, QColor
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
 from PySide6.QtCore import Qt
 
 from ui.Ui_MainWindow import Ui_MainWindow
 from runner import ScriptRunner
 
+# Windows taskbar icon fix
+if sys.platform == "win32":
+    try:
+        import ctypes
 
-DEFAULT_CODE = '''\
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("QTurtle.App")
+    except Exception:
+        pass
+
+
+DEFAULT_CODE = """\
 import turtle
 
 t = turtle.Turtle()
@@ -21,7 +30,7 @@ t.speed(3)
 for i in range(4):
     t.forward(100)
     t.right(90)
-'''
+"""
 
 
 class MainWindow(QMainWindow):
@@ -55,24 +64,37 @@ class MainWindow(QMainWindow):
         self.ui.codeEditor.document().modificationChanged.connect(self._on_modification_changed)
         self.ui.codeEditor.cursorPositionChanged.connect(self._update_status_bar)
 
-        # Load window icon
+        self._update_title()
+
+        # Load window icon for taskbar
         try:
-            icon_path = self.rootDir.parent / 'assets' / 'app.ico'
+            icon_path = self.rootDir.parent / "assets" / "app.ico"
             if icon_path.exists():
                 appIcon = QIcon(str(icon_path))
                 self.setWindowIcon(appIcon)
         except Exception:
             pass
 
-        self._update_title()
+        # center on screen
+        screen = QApplication.primaryScreen()
+        screen_h = screen.availableGeometry().height()
+        screen_w = screen.availableGeometry().width()
+        self.setGeometry(0, 0, int(screen_w * 0.75), int(screen_h * 0.75))
+        self.center()
+
         self.show()
+
+    def center(self):
+        center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
+        geo = self.frameGeometry()
+        geo.moveCenter(center)
+        self.move(geo.topLeft())
 
     def _setup_console(self):
         self.ui.consoleOutput.setReadOnly(True)
-        self.ui.consoleOutput.setFont(QFont("Consolas", 10))
         palette = self.ui.consoleOutput.palette()
-        palette.setColor(palette.ColorRole.Base, QColor("#0C0C0C"))
-        palette.setColor(palette.ColorRole.Text, QColor("#CCCCCC"))
+        palette.setColor(palette.ColorRole.Base, QColor("#FAFAFA"))
+        palette.setColor(palette.ColorRole.Text, QColor("#383A42"))
         self.ui.consoleOutput.setPalette(palette)
 
     def _connect_actions(self):
@@ -113,17 +135,12 @@ class MainWindow(QMainWindow):
         if not self._maybe_save():
             return
 
-        path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Open Python File",
-            str(Path.home()),
-            "Python Files (*.py);;All Files (*)"
-        )
+        path, _ = QFileDialog.getOpenFileName(self, "Open Python File", str(Path.home()), "Python Files (*.py);;All Files (*)")
         if not path:
             return
 
         try:
-            text = Path(path).read_text(encoding='utf-8')
+            text = Path(path).read_text(encoding="utf-8")
             self.ui.codeEditor.setPlainText(text)
             self.ui.codeEditor.document().setModified(False)
             self.current_file = Path(path)
@@ -136,10 +153,7 @@ class MainWindow(QMainWindow):
             return self.save_file_as()
 
         try:
-            self.current_file.write_text(
-                self.ui.codeEditor.toPlainText(),
-                encoding='utf-8'
-            )
+            self.current_file.write_text(self.ui.codeEditor.toPlainText(), encoding="utf-8")
             self.ui.codeEditor.document().setModified(False)
             self._update_title()
             return True
@@ -148,12 +162,7 @@ class MainWindow(QMainWindow):
             return False
 
     def save_file_as(self):
-        path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save Python File",
-            str(self.current_file or Path.home() / "untitled.py"),
-            "Python Files (*.py);;All Files (*)"
-        )
+        path, _ = QFileDialog.getSaveFileName(self, "Save Python File", str(self.current_file or Path.home() / "untitled.py"), "Python Files (*.py);;All Files (*)")
         if not path:
             return False
 
@@ -169,7 +178,7 @@ class MainWindow(QMainWindow):
             "Unsaved Changes",
             "The document has been modified.\nDo you want to save the changes?",
             QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
-            QMessageBox.StandardButton.Save
+            QMessageBox.StandardButton.Save,
         )
 
         if reply == QMessageBox.StandardButton.Save:
@@ -180,18 +189,16 @@ class MainWindow(QMainWindow):
             return False
 
     def run_script(self):
-        if self.runner.is_running:
-            return
-
         self.ui.consoleOutput.clear()
         self.ui.consoleOutput.appendPlainText("--- Running ---\n")
         code = self.ui.codeEditor.toPlainText()
         self.runner.run(code)
-        self.ui.actionRun.setEnabled(False)
-        self.ui.actionStop.setEnabled(True)
 
     def stop_script(self):
         self.runner.stop()
+        # Force paint/update the window before cleanup
+        self.ui.consoleOutput.appendPlainText("\n--- Stopped ---")
+        QApplication.processEvents()
 
     def _on_runner_output(self, text):
         self.ui.consoleOutput.moveCursor(self.ui.consoleOutput.textCursor().MoveOperation.End)
@@ -203,13 +210,11 @@ class MainWindow(QMainWindow):
         self.ui.consoleOutput.setTextCursor(cursor)
 
         fmt = QTextCharFormat()
-        fmt.setForeground(QColor("#FF6B6B"))
+        fmt.setForeground(QColor("#E45649"))
         cursor.insertText(text, fmt)
 
     def _on_runner_finished(self, exit_code):
         self.ui.consoleOutput.appendPlainText(f"\n--- Finished (exit code {exit_code}) ---")
-        self.ui.actionRun.setEnabled(True)
-        self.ui.actionStop.setEnabled(False)
 
     def closeEvent(self, event):
         if self._maybe_save():

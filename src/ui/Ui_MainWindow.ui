@@ -15,6 +15,9 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -27,9 +30,6 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <property name="spacing">
-     <number>0</number>
-    </property>
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -38,7 +38,7 @@
       <property name="childrenCollapsible">
        <bool>false</bool>
       </property>
-      <widget class="CodeEditor" name="codeEditor" native="true">
+      <widget class="CodeEditor" name="codeEditor">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -70,12 +70,12 @@
      <x>0</x>
      <y>0</y>
      <width>1100</width>
-     <height>26</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>&amp;File</string>
+     <string>&amp;Datei</string>
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
@@ -86,7 +86,7 @@
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>&amp;Edit</string>
+     <string>&amp;Bearbeiten</string>
     </property>
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
@@ -130,7 +130,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionNew">
    <property name="text">
-    <string>&amp;New</string>
+    <string>&amp;Neu</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -138,7 +138,7 @@
   </action>
   <action name="actionOpen">
    <property name="text">
-    <string>&amp;Open</string>
+    <string>&amp;Öffnen</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -170,7 +170,7 @@
   </action>
   <action name="actionCut">
    <property name="text">
-    <string>Cu&amp;t</string>
+    <string>Ausschneiden</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
@@ -178,7 +178,7 @@
   </action>
   <action name="actionCopy">
    <property name="text">
-    <string>&amp;Copy</string>
+    <string>Kopieren</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
@@ -186,7 +186,7 @@
   </action>
   <action name="actionPaste">
    <property name="text">
-    <string>&amp;Paste</string>
+    <string>Einfügen</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>

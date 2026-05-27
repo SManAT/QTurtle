@@ -30,8 +30,21 @@ if 'turtle' in _qturtle_sys.modules:
         self._temp_path = None
 
     def run(self, code: str):
+        # Kill any existing process before starting a new one
+        # This ensures old turtle windows are closed when running a new script or pressing F5 again
         if self.is_running:
-            return
+            self._process.kill()
+            if not self._process.waitForFinished(2000):
+                # Force kill if graceful kill didn't work
+                self._process.terminate()
+                self._process.waitForFinished(1000)
+            # Clean up temp file from killed process
+            if self._temp_path and os.path.exists(self._temp_path):
+                try:
+                    os.remove(self._temp_path)
+                except Exception:
+                    pass
+                self._temp_path = None
 
         # Detect if script uses turtle
         uses_turtle = 'import turtle' in code or 'from turtle' in code
@@ -67,6 +80,7 @@ if 'turtle' in _qturtle_sys.modules:
     def stop(self):
         if self._process is not None:
             self._process.kill()
+            self._process.waitForFinished(2000)
 
     @property
     def is_running(self) -> bool:

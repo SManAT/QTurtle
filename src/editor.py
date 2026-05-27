@@ -11,9 +11,9 @@ class PythonHighlighter(QSyntaxHighlighter):
         super().__init__(document)
         self._rules = []
 
-        # Keywords (blue)
+        # Keywords (red)
         kw_format = QTextCharFormat()
-        kw_format.setForeground(QColor("#569CD6"))
+        kw_format.setForeground(QColor("#A626A4"))
         kw_format.setFontWeight(QFont.Weight.Bold)
         keywords = [
             "False", "None", "True", "and", "as", "assert",
@@ -27,9 +27,9 @@ class PythonHighlighter(QSyntaxHighlighter):
             pattern = QRegularExpression(r"\b" + kw + r"\b")
             self._rules.append((pattern, kw_format))
 
-        # Built-ins (cyan)
+        # Built-ins (teal)
         builtin_format = QTextCharFormat()
-        builtin_format.setForeground(QColor("#4EC9B0"))
+        builtin_format.setForeground(QColor("#0184BC"))
         builtins = [
             "abs", "all", "any", "bin", "bool", "breakpoint", "bytearray",
             "bytes", "callable", "chr", "classmethod", "compile", "complex",
@@ -47,25 +47,25 @@ class PythonHighlighter(QSyntaxHighlighter):
             pattern = QRegularExpression(r"\b" + b + r"\b")
             self._rules.append((pattern, builtin_format))
 
-        # self/cls (light blue)
+        # self/cls (blue)
         self_format = QTextCharFormat()
-        self_format.setForeground(QColor("#9CDCFE"))
+        self_format.setForeground(QColor("#4078F2"))
         self._rules.append((QRegularExpression(r"\b(self|cls)\b"), self_format))
 
-        # Numbers (light green)
+        # Numbers (orange)
         num_format = QTextCharFormat()
-        num_format.setForeground(QColor("#B5CEA8"))
+        num_format.setForeground(QColor("#986801"))
         self._rules.append((QRegularExpression(r"\b\d+\.?\d*\b"), num_format))
 
-        # Strings (orange) - single and double quoted
+        # Strings (green) - single and double quoted
         str_format = QTextCharFormat()
-        str_format.setForeground(QColor("#CE9178"))
+        str_format.setForeground(QColor("#50A14F"))
         self._rules.append((QRegularExpression(r'"[^"\\]*(\\.[^"\\]*)*"'), str_format))
         self._rules.append((QRegularExpression(r"'[^'\\]*(\\.[^'\\]*)*'"), str_format))
 
-        # Comments (green) - must come last to override
+        # Comments (gray) - must come last to override
         comment_format = QTextCharFormat()
-        comment_format.setForeground(QColor("#6A9955"))
+        comment_format.setForeground(QColor("#A0A1A7"))
         comment_format.setFontItalic(True)
         self._rules.append((QRegularExpression(r"#[^\n]*"), comment_format))
 
@@ -100,6 +100,10 @@ class CodeEditor(QPlainTextEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.line_number_area = LineNumberArea(self)
+        self.base_font_size = 12
+        self.min_font_size = 8
+        self.max_font_size = 32
+        self.zoom_debug = False  # Set to True to see key codes in console
 
         # Connect signals for line number updates
         self.blockCountChanged.connect(self.update_line_number_area_width)
@@ -107,16 +111,16 @@ class CodeEditor(QPlainTextEdit):
         self.cursorPositionChanged.connect(self.highlight_current_line)
 
         # Set font - monospace
-        font = QFont("Consolas", 12)
+        font = QFont("Consolas", self.base_font_size)
         font.setStyleStrategy(QFont.StyleStrategy.PreferAntialias)
         self.setFont(font)
 
-        # Dark theme palette
+        # Light theme palette
         palette = self.palette()
-        palette.setColor(QPalette.ColorRole.Base, QColor("#1E1E1E"))
-        palette.setColor(QPalette.ColorRole.Text, QColor("#D4D4D4"))
-        palette.setColor(QPalette.ColorRole.Highlight, QColor("#264F78"))
-        palette.setColor(QPalette.ColorRole.HighlightedText, QColor("#D4D4D4"))
+        palette.setColor(QPalette.ColorRole.Base, QColor("#FAFAFA"))
+        palette.setColor(QPalette.ColorRole.Text, QColor("#383A42"))
+        palette.setColor(QPalette.ColorRole.Highlight, QColor("#E5E5E6"))
+        palette.setColor(QPalette.ColorRole.HighlightedText, QColor("#383A42"))
         self.setPalette(palette)
 
         # Tab stop = 4 spaces
@@ -128,7 +132,7 @@ class CodeEditor(QPlainTextEdit):
         self.update_line_number_area_width(0)
 
         # Current line highlight color
-        self._current_line_color = QColor("#2A2D2E")
+        self._current_line_color = QColor("#F0F0F0")
 
     def line_number_area_width(self):
         digits = len(str(max(1, self.blockCount())))
@@ -155,7 +159,7 @@ class CodeEditor(QPlainTextEdit):
 
     def line_number_area_paint_event(self, event):
         painter = QPainter(self.line_number_area)
-        painter.fillRect(event.rect(), QColor("#2A2A2A"))
+        painter.fillRect(event.rect(), QColor("#F5F5F5"))
 
         block = self.firstVisibleBlock()
         block_number = block.blockNumber()
@@ -164,7 +168,7 @@ class CodeEditor(QPlainTextEdit):
 
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
-                painter.setPen(QColor("#858585"))
+                painter.setPen(QColor("#9FA1A7"))
                 painter.drawText(
                     0, top,
                     self.line_number_area.width() - 3,
@@ -195,6 +199,25 @@ class CodeEditor(QPlainTextEdit):
         elif event.key() == Qt.Key.Key_F5:
             self.run_requested.emit()
             return
+        elif event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            # Handle zoom: Ctrl++ and Ctrl+-
+            key = event.key()
+            text = event.text()
+
+            if self.zoom_debug:
+                print(f"Ctrl pressed: key={key}, text='{text}'")
+
+            # Check for Plus: Key_Plus (93), Key_Equal, or text '+'
+            # Key code 93 is Ctrl+Shift+= (Plus) on some keyboards
+            if key in (Qt.Key.Key_Plus, Qt.Key.Key_Equal, 93) or text == '+':
+                self.zoom_in()
+                event.accept()
+                return
+            # Check for Minus: Key_Minus or text '-'
+            elif key == Qt.Key.Key_Minus or text == '-':
+                self.zoom_out()
+                event.accept()
+                return
 
         super().keyPressEvent(event)
 
@@ -234,3 +257,27 @@ class CodeEditor(QPlainTextEdit):
     def setDefaultCode(self, code: str):
         self.setPlainText(code)
         self.document().setModified(False)
+
+    def zoom_in(self):
+        font = self.font()
+        if font.pointSize() < self.max_font_size:
+            font.setPointSize(font.pointSize() + 1)
+            self.setFont(font)
+            self.update_line_number_area_width(0)
+
+    def zoom_out(self):
+        font = self.font()
+        if font.pointSize() > self.min_font_size:
+            font.setPointSize(font.pointSize() - 1)
+            self.setFont(font)
+            self.update_line_number_area_width(0)
+
+    def wheelEvent(self, event):
+        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            if event.angleDelta().y() > 0:
+                self.zoom_in()
+            else:
+                self.zoom_out()
+            event.accept()
+            return
+        super().wheelEvent(event)
