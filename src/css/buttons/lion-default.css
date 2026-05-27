@@ -1,0 +1,14 @@
+background: rgba(0,0,0,0.08), 
+QLinearGradient( spread:pad, x1: 0, y1: 0,
+                 x2: 0, y2: 1, 
+                 stop: 0 #e4fbff, 
+                 stop: 0.1 #cee6fb,
+                 stop: 0.5 #a5d3fb,
+                 stop: 0.51 #88c6fb,
+                 stop: 1 #d5faff
+);
+background-insets: 0 0 -1 0,0,1;
+background-radius: 5,5,4;
+padding: 3 30 3 30;
+text-fill: #242d35;
+color: #000000;

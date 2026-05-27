@@ -1,0 +1,33 @@
+# Usage: 
+#   Normal Install: pip install -e .
+#   Build: python -m build
+# be sure setuptools and build are in latest version
+# pip install --upgrade setuptools build
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyside6-template"
+version = "1.0.0"
+description = "A Qt6 application"
+readme = "README.md"
+authors = [
+    {name = "Mag. Stefan Hagmann"},
+]
+license = {text = "GPL-3.0-or-later"}
+keywords = ["pysid6", "gui", "desktop"]
+
+dependencies = [
+    "pyside6>=6.4.0",
+]
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+dev = [
+    "pyqt6-tools",  # Move to optional - often causes issues
+    "build",
+    "wheel",
+]
+

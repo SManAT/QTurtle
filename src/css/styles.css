@@ -1,0 +1,99 @@
+QMainWindow {
+    background-color: #1E1E1E;
+}
+
+QMenuBar {
+    background-color: #2D2D2D;
+    color: #D4D4D4;
+    border-bottom: 1px solid #3C3C3C;
+}
+
+QMenuBar::item:selected {
+    background-color: #094771;
+}
+
+QMenu {
+    background-color: #2D2D2D;
+    color: #D4D4D4;
+    border: 1px solid #454545;
+}
+
+QMenu::item:selected {
+    background-color: #094771;
+    color: #D4D4D4;
+}
+
+QToolBar {
+    background-color: #2D2D2D;
+    border-bottom: 1px solid #3C3C3C;
+    spacing: 3px;
+    padding: 2px;
+}
+
+QToolBar QToolButton {
+    background-color: transparent;
+    color: #D4D4D4;
+    border: none;
+    padding: 4px;
+    margin: 0px;
+}
+
+QToolBar QToolButton:hover {
+    background-color: #3E3E3E;
+    border-radius: 3px;
+}
+
+QToolBar QToolButton:pressed {
+    background-color: #0E639C;
+}
+
+/* Console output - target by object name to avoid the code editor */
+QPlainTextEdit#consoleOutput {
+    background-color: #0C0C0C;
+    color: #CCCCCC;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 11px;
+    border: none;
+    border-top: 1px solid #3C3C3C;
+}
+
+QStatusBar {
+    background-color: #007ACC;
+    color: white;
+    font-size: 12px;
+    border-top: 1px solid #3C3C3C;
+}
+
+QSplitter::handle {
+    background-color: #3C3C3C;
+    height: 3px;
+}
+
+QSplitter::handle:hover {
+    background-color: #007ACC;
+}
+
+QMessageBox {
+    background-color: #1E1E1E;
+}
+
+QMessageBox QLabel {
+    color: #D4D4D4;
+}
+
+QMessageBox QPushButton {
+    background-color: #007ACC;
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 3px;
+    min-width: 50px;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #0E639C;
+}
+
+QMessageBox QPushButton:pressed {
+    background-color: #003D5C;
+}
