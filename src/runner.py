@@ -10,11 +10,32 @@ class ScriptRunner(QObject):
     error_received = Signal(str)
     finished_with_code = Signal(int)
 
+    # Tracking code for turtle movements and timing
+    TURTLE_TRACKING = """
+import time as _qturtle_time
+_qturtle_start = _qturtle_time.time()
+_qturtle_forward_count = 0
+_qturtle_backward_count = 0
+
+def _qturtle_track_forward(self, distance):
+    global _qturtle_forward_count
+    _qturtle_forward_count += 1
+    return _qturtle_original_forward(self, distance)
+
+def _qturtle_track_backward(self, distance):
+    global _qturtle_backward_count
+    _qturtle_backward_count += 1
+    return _qturtle_original_backward(self, distance)
+"""
+
     # Epilog to keep turtle window open after script finishes
     TURTLE_EPILOG = """
 import sys as _qturtle_sys
 if 'turtle' in _qturtle_sys.modules:
     import turtle as _qturtle_t
+    _qturtle_elapsed = _qturtle_time.time() - _qturtle_start
+    _qturtle_total_lines = _qturtle_forward_count + _qturtle_backward_count
+    print(f"--- Gezeichnet in {_qturtle_elapsed:.2f}s (Linien: {_qturtle_total_lines}) ---")
     try:
         _qturtle_t.done()
     except Exception:
@@ -46,18 +67,32 @@ if 'turtle' in _qturtle_sys.modules:
                     pass
                 self._temp_path = None
 
-        # Detect if script uses turtle
-        uses_turtle = 'import turtle' in code or 'from turtle' in code
+        # Detect if script uses turtle or SVGTurtle
+        uses_turtle = ("import turtle" in code or "from turtle" in code or
+                       "SVGTurtle" in code or "svg_turtle" in code)
 
         # Build final code with UTF-8 setup and turtle epilog
-        full_code = self.UTF8_PREFIX + code
+        full_code = self.UTF8_PREFIX
         if uses_turtle:
-            full_code += '\n' + self.TURTLE_EPILOG
+            full_code += "\n" + self.TURTLE_TRACKING
+            full_code += """
+import turtle as _qturtle_t
+_qturtle_original_forward = _qturtle_t.Turtle.forward
+_qturtle_original_backward = _qturtle_t.Turtle.backward
+_qturtle_t.Turtle.forward = _qturtle_track_forward
+_qturtle_t.Turtle.backward = _qturtle_track_backward
+_qturtle_t.Turtle.fd = _qturtle_track_forward
+_qturtle_t.Turtle.bk = _qturtle_track_backward
+_qturtle_t.Turtle.back = _qturtle_track_backward
+"""
+        full_code += code
+        if uses_turtle:
+            full_code += "\n" + self.TURTLE_EPILOG
 
         # Write to temp file
         try:
-            fd, temp_path = tempfile.mkstemp(suffix='.py', prefix='qturtle_')
-            os.write(fd, full_code.encode('utf-8'))
+            fd, temp_path = tempfile.mkstemp(suffix=".py", prefix="qturtle_")
+            os.write(fd, full_code.encode("utf-8"))
             os.close(fd)
             self._temp_path = temp_path
         except Exception as e:
@@ -91,13 +126,13 @@ if 'turtle' in _qturtle_sys.modules:
     def _on_stdout(self):
         if self._process is None:
             return
-        data = self._process.readAllStandardOutput().data().decode('utf-8', errors='replace')
+        data = self._process.readAllStandardOutput().data().decode("utf-8", errors="replace")
         self.output_received.emit(data)
 
     def _on_stderr(self):
         if self._process is None:
             return
-        data = self._process.readAllStandardError().data().decode('utf-8', errors='replace')
+        data = self._process.readAllStandardError().data().decode("utf-8", errors="replace")
         self.error_received.emit(data)
 
     def _on_finished(self, exit_code, exit_status):

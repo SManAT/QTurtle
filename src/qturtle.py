@@ -22,14 +22,20 @@ if sys.platform == "win32":
 
 
 DEFAULT_CODE = """\
-import turtle
+from svg_turtle_class import SVGTurtle
 
-t = turtle.Turtle()
+# Turtle erstellen und konfigurieren
+t = SVGTurtle(width=400, height=400, filename=\"01_square.svg\", bgcolor=\"lightblue\")
+t.shape(\"turtle\")
+t.color(\"green\")
 t.speed(3)
 
+# Quadrat zeichnen
 for i in range(4):
     t.forward(100)
     t.right(90)
+
+t.save_svg()
 """
 
 
@@ -214,7 +220,7 @@ class MainWindow(QMainWindow):
         cursor.insertText(text, fmt)
 
     def _on_runner_finished(self, exit_code):
-        self.ui.consoleOutput.appendPlainText(f"\n--- Finished (exit code {exit_code}) ---")
+        self.ui.consoleOutput.appendPlainText(f"--- Done ---")
 
     def closeEvent(self, event):
         if self._maybe_save():
