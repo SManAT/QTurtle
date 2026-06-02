@@ -1,6 +1,6 @@
 @echo off
 echo ================================================
-echo Building QTurtle with PyInstaller
+echo Building QTurtle with PyOxidizer
 echo ================================================
 echo.
 
@@ -16,28 +16,23 @@ echo.
 python --version
 echo.
 
-REM Install/upgrade PyInstaller and tomli if needed
-echo Checking PyInstaller...
-pip show pyinstaller >nul 2>&1
+REM Install/upgrade PyOxidizer if needed
+echo Checking PyOxidizer...
+pip show pyoxidizer >nul 2>&1
 if errorlevel 1 (
-    echo Installing PyInstaller...
-    pip install pyinstaller
+    echo Installing PyOxidizer...
+    pip install pyoxidizer
 )
 
-echo Checking tomli (for Python 3.10 and earlier)...
-pip show tomli >nul 2>&1
-if errorlevel 1 (
-    echo Installing tomli...
-    pip install tomli
-)
-
-REM Build
+REM Build with PyOxidizer
 echo.
-echo Building application...
-python auto_build.py
+echo Building application with PyOxidizer...
+echo This may take a few minutes on first build...
+echo.
+pyoxidizer build
 
 echo.
 echo ================================================
 echo Build complete!
-echo Executable: dist\QTurtle\
+echo Executable: target\release\qturtle.exe
 echo ================================================

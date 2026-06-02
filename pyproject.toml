@@ -31,3 +31,26 @@ dev = [
     "wheel",
 ]
 
+[tool.qturtle.build]
+app_name = "QTurtle"
+app_module = "src/qturtle.py"
+icon = "assets/app.ico"
+data_files = [
+    "src/css",
+    "src/ui",
+]
+output_dir = "dist"
+build_mode = "onedir"  # onedir or onefile
+clean = true
+noconfirm = true
+windowed = true
+hidden_imports = [
+    "turtle",
+    "PySide6.QtCore",
+    "PySide6.QtGui",
+    "PySide6.QtWidgets",
+]
+collect_all = [
+    "PySide6",
+]
+

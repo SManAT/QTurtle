@@ -1,141 +1,139 @@
 #!/usr/bin/env python3
-"""Build script with automatic virtual environment detection"""
+"""Build QTurtle executable with PyInstaller using TOML configuration"""
 
-import os
 import sys
 from pathlib import Path
+
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
 
 import PyInstaller.__main__
 
 
-def check_virtual_env():
-    """Check if running in virtual environment and show info"""
-    in_venv = hasattr(sys, "real_prefix") or (hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix)
+def load_config():
+    """Load build configuration from pyproject.toml"""
+    config_path = Path("pyproject.toml")
 
-    venv_path = os.environ.get("VIRTUAL_ENV", None)
+    if not config_path.exists():
+        raise FileNotFoundError("pyproject.toml not found")
+
+    with open(config_path, "rb") as f:
+        config = tomllib.load(f)
+
+    return config.get("tool", {}).get("qturtle", {}).get("build", {})
+
+
+def get_python_env():
+    """Determine Python environment to use"""
+    venv_dir = Path(".venv")
+
+    # Check if .venv exists
+    if venv_dir.exists():
+        env_type = ".venv (virtual environment)"
+        using_venv = True
+    else:
+        env_type = "system Python"
+        using_venv = False
 
     print("=" * 60)
-    print("Environment Check")
+    print("Environment Information")
     print("=" * 60)
     print(f"Python executable: {sys.executable}")
     print(f"Python version: {sys.version.split()[0]}")
-    print(f"Running in venv: {'✅ YES' if in_venv else '❌ NO'}")
-
-    if venv_path:
-        print(f"Virtual env path: {venv_path}")
-
-    if not in_venv:
-        print("\n⚠ WARNING: Not running in virtual environment!")
-        print("   Recommendation: Activate .venv first")
-
-        venv_dir = Path(".venv")
-        if venv_dir.exists():
-            if sys.platform == "win32":
-                print("\n   Run: .venv\\Scripts\\activate")
-            else:
-                print("\n   Run: source .venv/bin/activate")
-
-        response = input("\nContinue anyway? (y/n): ")
-        if response.lower() != "y":
-            print("Exiting...")
-            sys.exit(0)
-
+    print(f"Using: {env_type}")
+    print(f"Current directory: {Path.cwd()}")
     print("=" * 60 + "\n")
 
+    return using_venv
 
-def get_hidden_imports_from_venv():
-    """Get packages installed in current environment"""
-    import pkg_resources
 
-    installed_packages = {pkg.key for pkg in pkg_resources.working_set}
+def build_config_to_args(config):
+    """Convert TOML config to PyInstaller arguments"""
+    if not config:
+        raise ValueError("No build configuration found in pyproject.toml")
 
-    # Package name mappings
-    name_mappings = {
-        "opencv-python": "cv2",
-        "opencv-python-headless": "cv2",
-        "pillow": "PIL",
-        "pyyaml": "yaml",
-        "scikit-learn": "sklearn",
-        "beautifulsoup4": "bs4",
-        "pyqt6": "PyQt6",
-        "pyqt5": "PyQt5",
-    }
+    # Platform separator for add-data paths
+    sep = ";" if sys.platform == "win32" else ":"
 
-    hidden_imports = []
-    for pkg in installed_packages:
-        if pkg in name_mappings:
-            hidden_imports.append(name_mappings[pkg])
-        elif pkg not in ["pip", "setuptools", "wheel", "pyinstaller"]:
-            # Add package, converting dashes to underscores
-            hidden_imports.append(pkg.replace("-", "_"))
+    # Required fields
+    app_module = config.get("app_module", "src/qturtle.py")
+    app_name = config.get("app_name", "QTurtle")
 
-    return hidden_imports
+    args = [
+        app_module,
+        f"--name={app_name}",
+    ]
+
+    # Optional: icon
+    icon = config.get("icon")
+    if icon and Path(icon).exists():
+        args.append(f"--icon={icon}")
+
+    # Optional: windowed mode
+    if config.get("windowed", True):
+        args.append("--windowed")
+
+    # Build mode (onedir or onefile)
+    build_mode = config.get("build_mode", "onedir")
+    args.append(f"--{build_mode}")
+
+    # Optional: clean and noconfirm
+    if config.get("clean", True):
+        args.append("--clean")
+    if config.get("noconfirm", True):
+        args.append("--noconfirm")
+
+    # Add data files
+    data_files = config.get("data_files", [])
+    for data_file in data_files:
+        if Path(data_file).exists():
+            args.append(f"--add-data={data_file}{sep}{Path(data_file).name}")
+
+    # Hidden imports
+    hidden_imports = config.get("hidden_imports", [])
+    for imp in hidden_imports:
+        args.append(f"--hidden-import={imp}")
+
+    # Collect all packages
+    collect_all = config.get("collect_all", [])
+    for pkg in collect_all:
+        args.append(f"--collect-all={pkg}")
+
+    return args
 
 
 def build():
-    """Build the application"""
-    # Check environment
-    check_virtual_env()
+    """Build the QTurtle application"""
+    print("📋 Loading configuration from pyproject.toml...\n")
+    config = load_config()
 
-    # Get hidden imports from installed packages
-    print("📦 Detecting installed packages...")
-    hidden_imports = get_hidden_imports_from_venv()
+    if not config:
+        print("❌ No [tool.qturtle.build] section found in pyproject.toml")
+        sys.exit(1)
 
-    print(f"   Found {len(hidden_imports)} packages")
-    print("\n🔍 Key packages detected:")
-    key_packages = ["cv2", "PyQt6", "numpy", "PIL"]
-    for pkg in key_packages:
-        if pkg in hidden_imports:
-            print(f"   ✓ {pkg}")
+    app_name = config.get("app_name", "QTurtle")
 
-    # Platform separator
-    sep = ";" if sys.platform == "win32" else ":"
+    print(f"📦 Build Configuration for {app_name}")
+    print("=" * 60)
+    print(f"App module: {config.get('app_module', 'src/qturtle.py')}")
+    print(f"Icon: {config.get('icon', 'Not set')}")
+    print(f"Build mode: {config.get('build_mode', 'onedir')}")
+    print(f"Data files: {', '.join(config.get('data_files', []))}")
+    print(f"Hidden imports: {len(config.get('hidden_imports', []))} packages")
+    print("=" * 60 + "\n")
 
-    # Build arguments
-    # add-data: what{sep}copy to
-    args = [
-        "src/BookImagerQT.py",
-        # "--onefile",
-        "--windowed",
-        "--name=book-imager",
-        "--icon=src/app.ico",
-        # for runtime load, add the icon to root dir
-        f"--add-data=src/app.ico{sep}.",
-        f"--add-data=src/ui{sep}ui",
-        f"--add-data=src/icons{sep}icons",
-        f"--add-data=src/images{sep}images",
-        f"--add-data=src/classes/logger_config.yaml{sep}classes",
-        "--clean",
-        "--noconfirm",
-        "--onedir",
-        "--console",
-    ]
+    get_python_env()
 
-    # Add critical hidden imports
-    critical_imports = [
-        "cv2",
-        "numpy",
-        "PyQt6.QtCore",
-        "PyQt6.QtGui",
-        "PyQt6.QtWidgets",
-    ]
+    args = build_config_to_args(config)
 
-    for imp in critical_imports:
-        args.append(f"--hidden-import={imp}")
-
-    # Collect data for critical packages
-    args.extend(
-        [
-            "--collect-all=cv2",
-            "--collect-all=numpy",
-        ]
-    )
-
-    print("\n🔨 Building with PyInstaller...")
+    print("🔨 Building with PyInstaller...\n")
     PyInstaller.__main__.run(args)
 
-    print("\n✅ Build complete!")
-    print("   Executable: dist/book-imager")
+    output_dir = config.get("output_dir", "dist")
+    print(f"\n✅ Build complete!")
+    print(f"   Executable: {output_dir}/{app_name}/")
 
 
 if __name__ == "__main__":
@@ -147,6 +145,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Build failed: {e}")
         import traceback
-
         traceback.print_exc()
         sys.exit(1)
