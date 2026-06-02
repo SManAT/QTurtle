@@ -4,12 +4,12 @@ from pathlib import Path
 # Add qturtle package dir to path so Ui_MainWindow.py can import editor
 sys.path.insert(0, str(Path(__file__).parent))
 
-from PySide6.QtGui import QIcon, QPixmap, QFont, QScreen, QTextCharFormat, QColor
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
 from PySide6.QtCore import Qt
-
+from PySide6.QtGui import QColor, QFont, QIcon, QPixmap, QScreen, QTextCharFormat
+from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox
 from ui.Ui_MainWindow import Ui_MainWindow
-from runner import ScriptRunner
+
+from qturtle.runner import ScriptRunner
 
 # Windows taskbar icon fix
 if sys.platform == "win32":

@@ -16,7 +16,8 @@ readme = "README.md"
 authors = [
     {name = "Mag. Stefan Hagmann"},
 ]
-license = {text = "GPL-3.0-or-later"}
+license = {file = "LICENSE"}
+license-files = ["LICENSE"]
 keywords = ["pyside6", "gui", "desktop"]
 
 dependencies = [
@@ -29,10 +30,13 @@ dev = [
     "pyqt6-tools",  # Move to optional - often causes issues
     "build",
     "wheel",
+    "pyinstaller>=6.0.0",
+]
+briefcase = [
+    "briefcase>=0.3.0",
 ]
 
 [tool.setuptools]
-license-files = ["LICENSE", "LICENSE.rtf"]
 
 # PyInstaller configuration -----------------------------------------------------------
 [tool.qturtle.build]
@@ -53,6 +57,10 @@ hidden_imports = [
     "PySide6.QtCore",
     "PySide6.QtGui",
     "PySide6.QtWidgets",
+    "qturtle.editor",
+    "qturtle.runner",
+    "qturtle.svg_turtle_class",
+    "qturtle.ui.Ui_MainWindow",
 ]
 collect_all = [
     "PySide6",
@@ -74,11 +82,12 @@ description = "Python IDE for running turtle graphics scripts"
 sources = ["src/qturtle"]
 requires = ["pyside6>=6.4.0"]
 icon = "assets/app"
-resources = ["LICENSE.rtf"]
+license-files = ["LICENSE"]
 
 [tool.briefcase.app.qturtle.windows]
 requires = [
     "pyside6>=6.4.0",
+    "svg-turtle>=1.0.0",
 ]
 system_installer = true
 

@@ -1,4 +1,9 @@
 @echo off
+setlocal enabledelayedexpansion
+
+REM Output directory variables
+set "OUTPUT_DIR=dist\QTurtle"
+
 echo ================================================
 echo Building QTurtle with PyInstaller
 echo ================================================
@@ -39,5 +44,5 @@ python auto_build.py
 echo.
 echo ================================================
 echo Build complete!
-echo Executable: dist\QTurtle\
+echo Executable: %OUTPUT_DIR%\
 echo ================================================

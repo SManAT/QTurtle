@@ -1,8 +1,9 @@
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
-from PySide6.QtCore import QObject, QProcess, Signal
+from PySide6.QtCore import QObject, QProcess, QProcessEnvironment, Signal
 
 
 class ScriptRunner(QObject):
@@ -105,12 +106,56 @@ _qturtle_t.Turtle.back = _qturtle_track_backward
         self._process.readyReadStandardError.connect(self._on_stderr)
         self._process.finished.connect(self._on_finished)
 
+        python_exe = self._find_python()
+        if not python_exe:
+            self.error_received.emit("Python interpreter not found.")
+            self._process = None
+            return
+
+        # Make qturtle package importable in the subprocess
+        env = QProcessEnvironment.systemEnvironment()
+        existing = env.value('PYTHONPATH', '')
+        # parent of the qturtle package dir works for source, PyInstaller, and Briefcase
+        pkg_root = str(Path(__file__).parent.parent)
+        extra = [pkg_root]
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            extra.insert(0, sys._MEIPASS)
+        env.insert('PYTHONPATH', ';'.join(filter(None, extra + [existing])))
+        self._process.setProcessEnvironment(env)
+
         # Start process
         try:
-            self._process.start(sys.executable, [temp_path])
+            self._process.start(python_exe, [temp_path])
         except Exception as e:
             self.error_received.emit(f"Failed to start process: {e}")
             self._process = None
+
+    @staticmethod
+    def _find_python() -> str:
+        """Return a Python interpreter path safe for subprocess use.
+
+        sys.executable is the app stub in PyInstaller and Briefcase bundles,
+        not the Python interpreter — launching it would open a second app window.
+        """
+        exe = Path(sys.executable)
+        # Source / normal Python: executable is already python/pythonw
+        if exe.stem.lower().startswith('python'):
+            return str(exe)
+
+        # PyInstaller onedir: check _MEIPASS for a bundled python.exe
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            bundled = Path(sys._MEIPASS) / 'python.exe'
+            if bundled.exists():
+                return str(bundled)
+
+        # Briefcase: support/python.exe sits one or two levels up from the launcher
+        for base in (exe.parent, exe.parent.parent):
+            candidate = base / 'support' / 'python.exe'
+            if candidate.exists():
+                return str(candidate)
+
+        # Last resort: system Python in PATH
+        return shutil.which('python') or shutil.which('python3') or ''
 
     def stop(self):
         if self._process is not None:

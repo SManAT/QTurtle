@@ -221,7 +221,7 @@
   <customwidget>
    <class>CodeEditor</class>
    <extends>QPlainTextEdit</extends>
-   <header>editor</header>
+   <header>qturtle.editor</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -1,50 +1,67 @@
 @echo off
+REM Build QTurtle with Briefcase and copy output to dist folder
+
+setlocal enabledelayedexpansion
+
+REM Output directory variables
+set "BRIEFCASE_SOURCE=build\qturtle\windows\app\src"
+set "OUTPUT_DIR=dist\QTurtleBriefcase"
+
 echo ================================================
 echo Building QTurtle with Briefcase
 echo ================================================
 echo.
 
-REM Check if .venv exists, if so activate it
-if exist .venv (
-    echo Activating virtual environment...
-    call .venv\Scripts\activate.bat
-) else (
-    echo Using system Python
-)
-
-echo.
-python --version
-echo.
-
-REM Install/upgrade Briefcase if needed
-echo Checking Briefcase...
-pip show briefcase >nul 2>&1
+REM Run Briefcase build
+echo Running: briefcase create windows
+call briefcase create windows
 if errorlevel 1 (
-    echo Installing Briefcase...
-    pip install briefcase
+    echo ERROR: Briefcase create failed
+    exit /b 1
 )
 
-REM Build with Briefcase
 echo.
-echo Creating/building application with Briefcase...
-echo.
-
-REM Check if briefcase project already exists
-if not exist "src\qturtle\__main__.py" (
-    echo Initializing Briefcase project structure...
-    briefcase create windows
+echo Running: briefcase build windows
+call briefcase build windows
+if errorlevel 1 (
+    echo ERROR: Briefcase build failed
+    exit /b 1
 )
 
-echo Building for Windows...
-briefcase build windows
-briefcase build windows
+echo.
+echo ================================================
+echo Copying executable to dist folder
+echo ================================================
+echo.
+
+REM Check if source directory exists
+if not exist "%BRIEFCASE_SOURCE%" (
+    echo ERROR: Briefcase output directory not found
+    echo Expected: %BRIEFCASE_SOURCE%
+    exit /b 1
+)
+
+REM Clean old build
+if exist "%OUTPUT_DIR%" (
+    echo Cleaning old build...
+    rmdir /s /q "%OUTPUT_DIR%"
+)
+
+REM Create output directory
+mkdir "%OUTPUT_DIR%"
+echo Created: %OUTPUT_DIR%
+
+REM Copy all files from source to output
+echo Copying files from %BRIEFCASE_SOURCE% to %OUTPUT_DIR%...
+xcopy /E /I /Y "%BRIEFCASE_SOURCE%\*" "%OUTPUT_DIR%\" > nul
+
+if errorlevel 1 (
+    echo ERROR: Copy operation failed
+    exit /b 1
+)
+
 echo.
 echo ================================================
 echo Build complete!
-echo Executable: build\qturtle\windows\app\src\QTurtle.exe
+echo Executable: %OUTPUT_DIR%\QTurtle.exe
 echo ================================================
-echo.
-
-
-briefcase package windows
-

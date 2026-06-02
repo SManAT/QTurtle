@@ -1,1 +1,1 @@
-pyside6-uic src/ui/Ui_MainWindow.ui > src/ui/Ui_MainWindow.py
+pyside6-uic src/qturtle/ui/Ui_MainWindow.ui > src/qturtle/ui/Ui_MainWindow.py
