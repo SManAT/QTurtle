@@ -8,7 +8,7 @@
       "name": "Python Debugger",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/qturtle.py",
+      "program": "${workspaceFolder}/src/qturtle/__main__.py",
       "console": "integratedTerminal"
     }
   ]

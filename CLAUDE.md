@@ -41,6 +41,12 @@ briefcase create windows && briefcase build windows
 ```
 Outputs to `build/qturtle/windows/app/src/QTurtle.exe`. Includes app icon, MSI installer support.
 
+**Briefcase to dist** (Copy output to dist folder like PyInstaller)
+```bash
+build_briefcase_to_dist.bat
+```
+Builds with Briefcase and copies `build/qturtle/windows/app/src/` to `dist/QTurtle/`. Same executable location as PyInstaller.
+
 ### Type Checking
 Pyright is configured in `pyrightconfig.json`. Check types:
 ```bash
