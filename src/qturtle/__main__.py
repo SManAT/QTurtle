@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-# Add src/ to path so Ui_MainWindow.py can import editor
+# Add qturtle package dir to path so Ui_MainWindow.py can import editor
 sys.path.insert(0, str(Path(__file__).parent))
 
 from PySide6.QtGui import QIcon, QPixmap, QFont, QScreen, QTextCharFormat, QColor
@@ -22,7 +22,7 @@ if sys.platform == "win32":
 
 
 DEFAULT_CODE = """\
-from svg_turtle_class import SVGTurtle
+from qturtle.svg_turtle_class import SVGTurtle
 
 # Turtle erstellen und konfigurieren
 t = SVGTurtle(width=400, height=400, filename=\"01_square.svg\", bgcolor=\"lightblue\")
@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
 
         # Load window icon for taskbar
         try:
-            icon_path = self.rootDir.parent / "assets" / "app.ico"
+            icon_path = self.rootDir.parent.parent / "assets" / "app.ico"
             if icon_path.exists():
                 appIcon = QIcon(str(icon_path))
                 self.setWindowIcon(appIcon)

@@ -17,7 +17,7 @@ authors = [
     {name = "Mag. Stefan Hagmann"},
 ]
 license = {text = "GPL-3.0-or-later"}
-keywords = ["pysid6", "gui", "desktop"]
+keywords = ["pyside6", "gui", "desktop"]
 
 dependencies = [
     "pyside6>=6.4.0",
@@ -31,13 +31,17 @@ dev = [
     "wheel",
 ]
 
+[tool.setuptools]
+license-files = ["LICENSE", "LICENSE.rtf"]
+
+# PyInstaller configuration -----------------------------------------------------------
 [tool.qturtle.build]
 app_name = "QTurtle"
-app_module = "src/qturtle.py"
+app_module = "src/qturtle/__main__.py"
 icon = "assets/app.ico"
 data_files = [
-    "src/css",
-    "src/ui",
+    "src/qturtle/css",
+    "src/qturtle/ui",
 ]
 output_dir = "dist"
 build_mode = "onedir"  # onedir or onefile
@@ -53,4 +57,28 @@ hidden_imports = [
 collect_all = [
     "PySide6",
 ]
+
+# Briefcase configuration -------------------------------------------------------------
+[tool.briefcase]
+project_name = "QTurtle"
+bundle = "org.qturtle"
+version = "0.1.0"
+url = "https://github.com/stefanhag/QTurtle"
+license = "GPL-3.0-or-later"
+author = "Mag. Stefan Hagmann"
+author_email = "sman@mailbox.org"
+
+[tool.briefcase.app.qturtle]
+formal_name = "QTurtle"
+description = "Python IDE for running turtle graphics scripts"
+sources = ["src/qturtle"]
+requires = ["pyside6>=6.4.0"]
+icon = "assets/app"
+resources = ["LICENSE.rtf"]
+
+[tool.briefcase.app.qturtle.windows]
+requires = [
+    "pyside6>=6.4.0",
+]
+system_installer = true
 

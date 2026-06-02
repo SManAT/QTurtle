@@ -16,14 +16,30 @@ pip install -e ".[dev]"
 
 ### Running the Application
 ```bash
-python src/qturtle.py
+python -m qturtle
+# or
+python src/qturtle
 ```
 
 ### Building an Executable
+
+QTurtle supports two packaging tools. See **PyInstaller.md** for detailed comparison.
+
+**PyInstaller** (Default - Recommended)
 ```bash
+build_pyinstaller.bat
+# or
 python auto_build.py
 ```
-The build script detects your Python environment, verifies virtual environment usage, and bundles the app with PyInstaller. It outputs to `dist/`.
+Outputs to `dist/QTurtle/qturtle.exe`. Fast setup, ~150-200MB binary.
+
+**Briefcase** (Professional packaging with MSI installer)
+```bash
+build_briefcase.bat
+# or
+briefcase create windows && briefcase build windows
+```
+Outputs to `build/qturtle/windows/app/src/QTurtle.exe`. Includes app icon, MSI installer support.
 
 ### Type Checking
 Pyright is configured in `pyrightconfig.json`. Check types:
@@ -77,21 +93,30 @@ The main window uses a vertical splitter:
 
 ```
 src/
-├── qturtle.py              # Main application window
-├── editor.py               # Code editor with syntax highlighting
-├── runner.py               # Subprocess runner for script execution
-├── ui/
-│   ├── Ui_MainWindow.py    # Generated UI (from Designer, do not edit)
-│   └── Ui_MainWindow.ui    # Qt Designer UI file
-├── css/
-│   └── styles.css          # Application stylesheet
-└── pyside6_template.egg-info/  # Package metadata
+└── qturtle/                        # Main package
+    ├── __init__.py                 # Package initialization
+    ├── __main__.py                 # Application entry point
+    ├── editor.py                   # Code editor with syntax highlighting
+    ├── runner.py                   # Subprocess runner for script execution
+    ├── svg_turtle_class.py         # SVG and turtle graphics wrapper
+    ├── ui/
+    │   ├── __init__.py             # UI package
+    │   ├── Ui_MainWindow.py        # Generated UI (from Designer, do not edit)
+    │   └── Ui_MainWindow.ui        # Qt Designer UI file
+    └── css/
+        ├── styles.css              # Light theme stylesheet
+        └── dark.css                # Dark theme stylesheet
 
 Root files:
-├── auto_build.py           # PyInstaller build script
-├── setup.cfg               # Linting and style configuration
-├── pyrightconfig.json      # Pyright type checker config
-└── pyproject.toml          # Package definition
+├── auto_build.py                 # PyInstaller build script
+├── build_pyinstaller.bat         # PyInstaller batch file
+├── build_briefcase.bat           # Briefcase batch file
+├── PyInstaller.md                # Detailed comparison of build tools
+├── setup.cfg                     # Linting and style configuration
+├── pyrightconfig.json            # Pyright type checker config
+├── LICENSE                       # GPL 3.0+ license (text)
+├── LICENSE.rtf                   # GPL 3.0+ license (RTF format for Windows)
+└── pyproject.toml                # Package definition with build configs
 ```
 
 ## Modifying the UI
@@ -108,10 +133,15 @@ To modify the UI (window layout, menus, buttons):
 
 ## Dependencies
 
+Core:
 - **pyside6** ≥6.4.0 — Qt6 bindings for Python
 - **pyqt6-tools** (dev) — Includes pyside6-uic for UI compilation
 - **build, wheel** (dev) — Package building tools
-- **pyinstaller** (build) — Creates executables
+
+Build tools (install as needed):
+- **pyinstaller** — Default executable builder (already configured in `auto_build.py`)
+- **briefcase** — BeeWare multi-platform builder (Windows, macOS, Linux, iOS, Android)
+- **tomli** — Required by PyInstaller for Python 3.10 and earlier (TOML support)
 
 ## Design Notes
 

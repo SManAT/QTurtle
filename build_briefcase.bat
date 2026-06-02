@@ -37,13 +37,14 @@ if not exist "src\qturtle\__main__.py" (
 
 echo Building for Windows...
 briefcase build windows
-
+briefcase build windows
 echo.
 echo ================================================
 echo Build complete!
-echo Executable: build\qturtle\windows\app\QTurtle.exe
+echo Executable: build\qturtle\windows\app\src\QTurtle.exe
 echo ================================================
 echo.
-echo Optional: Package for distribution
-echo   briefcase package windows
-echo.
+
+
+briefcase package windows
+
