@@ -1,8 +1,5 @@
 # Usage: 
-#   Normal Install: pip install -e .
-#   Build: python -m build
-# be sure setuptools and build are in latest version
-# pip install --upgrade setuptools build
+#   pip install -e .
 
 [build-system]
 requires = ["setuptools>=45", "wheel"]
@@ -22,6 +19,7 @@ keywords = ["pyside6", "gui", "desktop"]
 
 dependencies = [
     "pyside6>=6.4.0",
+    "svg_turtle",
 ]
 requires-python = ">=3.8"
 

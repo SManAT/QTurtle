@@ -1,11 +1,31 @@
 """
-SVG_Turtle_Output: Simple wrapper for generating SVG output using turtle-like commands.
-SVGTurtle: Wrapper that uses ColabTurtle for animation and SVG_Turtle for export.
+SVG_Turtle_Output:
+Simple wrapper for generating SVG output using turtle-like commands.
+SVGTurtle:
+Wrapper that uses python turtle for animation and SVG_Turtle for export.
+
+Example:
+from qturtle.svg_turtle_class import SVGTurtle
+
+# Turtle erstellen und konfigurieren
+t = SVGTurtle(width=400, height=400, filename="01_square.svg", bgcolor="lightblue")
+t.shape("turtle")
+t.color("green")
+t.speed(3)
+
+# Quadrat zeichnen
+for i in range(4):
+    t.forward(100)
+    t.right(90)
+
+t.save_svg()
+
 """
 
 import math
 import os
 from turtle import Turtle
+
 from svg_turtle import SvgTurtle
 
 
