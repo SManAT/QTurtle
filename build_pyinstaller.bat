@@ -2,10 +2,10 @@
 setlocal enabledelayedexpansion
 
 REM Output directory variables
-set "OUTPUT_DIR=dist\QTurtle"
+set "OUTPUT_DIR=dist\QrCode"
 
 echo ================================================
-echo Building QTurtle with PyInstaller
+echo Building App with PyInstaller
 echo ================================================
 echo.
 

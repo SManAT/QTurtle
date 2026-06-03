@@ -4,11 +4,11 @@ REM Build QTurtle with Briefcase and copy output to dist folder
 setlocal enabledelayedexpansion
 
 REM Output directory variables
-set "BRIEFCASE_SOURCE=build\qturtle\windows\app\src"
-set "OUTPUT_DIR=dist\QTurtleBriefcase"
+set "BRIEFCASE_SOURCE=build\app\windows\app\src"
+set "OUTPUT_DIR=dist\QCodeBriefcase"
 
 echo ================================================
-echo Building QTurtle with Briefcase
+echo Building App with Briefcase
 echo ================================================
 echo.
 
@@ -63,5 +63,5 @@ if errorlevel 1 (
 echo.
 echo ================================================
 echo Build complete!
-echo Executable: %OUTPUT_DIR%\QTurtle.exe
+echo Executable: %OUTPUT_DIR%\<App>.exe
 echo ================================================
