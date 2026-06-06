@@ -39,7 +39,7 @@ briefcase = [
 # PyInstaller configuration -----------------------------------------------------------
 [tool.qturtle.build]
 app_name = "QTurtle"
-app_module = "src/qturtle/__main__.py"
+app_module = "src/qturtle/main.py"
 icon = "assets/app.ico"
 data_files = [
     "src/qturtle/css",
