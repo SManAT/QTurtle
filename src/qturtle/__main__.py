@@ -1,14 +1,10 @@
 import sys
 from pathlib import Path
 
-# Add qturtle package dir to path so Ui_MainWindow.py can import editor
-sys.path.insert(0, str(Path(__file__).parent))
-
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QFont, QIcon, QPixmap, QScreen, QTextCharFormat
 from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox
-from ui.Ui_MainWindow import Ui_MainWindow
-
+from qturtle.ui.Ui_MainWindow import Ui_MainWindow
 from qturtle.runner import ScriptRunner
 
 # Windows taskbar icon fix
@@ -238,7 +234,11 @@ class MainWindow(QMainWindow):
             print(f"CSS file '{css_path}' not found")
 
 
-if __name__ == "__main__":
+def main():
     app = QApplication(sys.argv)
     window = MainWindow()
-    sys.exit(app.exec())
+    return app.exec()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
