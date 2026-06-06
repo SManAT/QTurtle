@@ -1,5 +1,5 @@
 import sys
-from qturtle.__main__ import main
+from qturtle.main import main
 
 if __name__ == "__main__":
     sys.exit(main())
