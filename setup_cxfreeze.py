@@ -11,16 +11,16 @@ build_exe_options = {
         "PySide6.QtGui",
         "PySide6.QtWidgets",
         "PySide6.QtPrintSupport",
-        "qturtle",
-        "qturtle.editor",
-        "qturtle.runner",
-        "qturtle.svg_turtle_class",
-        "qturtle.ui",
-        "qturtle.ui.Ui_MainWindow",
+        "qturtle_app",
+        "qturtle_app.editor",
+        "qturtle_app.runner",
+        "qturtle_app.svg_turtle_class",
+        "qturtle_app.ui",
+        "qturtle_app.ui.Ui_MainWindow",
     ],
     "include_files": [
-        ("src/qturtle/css", "lib/qturtle/css"),
-        ("src/qturtle/ui/Ui_MainWindow.ui", "lib/qturtle/ui/Ui_MainWindow.ui"),
+        ("src/qturtle_app/css", "lib/qturtle_app/css"),
+        ("src/qturtle_app/ui/Ui_MainWindow.ui", "lib/qturtle_app/ui/Ui_MainWindow.ui"),
     ],
     "excludes": [
         "PyQt6",
@@ -49,11 +49,11 @@ build_exe_options = {
     "build_exe": "build/cxfreeze_temp",
 }
 
-icon_path = "assets/app.ico"
+icon_path = "src/assets/app.ico"
 
 executables = [
     Executable(
-        script="src/qturtle/__main__.py",
+        script="src/main.py",
         base="gui" if sys.platform == "win32" else None,
         target_name="QTurtle.exe" if sys.platform == "win32" else "QTurtle",
         icon=icon_path if (sys.platform == "win32" and Path(icon_path).exists()) else None,

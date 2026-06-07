@@ -37,13 +37,12 @@ briefcase = [
 [tool.setuptools]
 
 # PyInstaller configuration -----------------------------------------------------------
-[tool.qturtle.build]
+[tool.qturtle_app.build]
 app_name = "QTurtle"
-app_module = "src/qturtle/main.py"
-icon = "assets/app.ico"
+app_module = "src/main.py"
+icon = "src/assets/app.ico"
 data_files = [
-    "src/qturtle/css",
-    "src/qturtle/ui",
+    "src/qturtle_app",
 ]
 output_dir = "dist"
 build_mode = "onedir"  # onedir or onefile
@@ -57,10 +56,10 @@ hidden_imports = [
     "PySide6.QtGui",
     "PySide6.QtWidgets",
     "PySide6.QtPrintSupport",
-    "qturtle.editor",
-    "qturtle.runner",
-    "qturtle.svg_turtle_class",
-    "qturtle.ui.Ui_MainWindow",
+    "qturtle_app.editor",
+    "qturtle_app.runner",
+    "qturtle_app.svg_turtle_class",
+    "qturtle_app.ui.Ui_MainWindow",
 ]
 collect_all = []
 strip = true   # Strip debug symbols (Unix only, ignored on Windows)
@@ -111,15 +110,15 @@ license = "GPL-3.0-or-later"
 author = "Mag. Stefan Hagmann"
 author_email = "sman@mailbox.org"
 
-[tool.briefcase.app.qturtle]
+[tool.briefcase.app.qturtle_app]
 formal_name = "QTurtle"
 description = "Python IDE for running turtle graphics scripts"
-sources = ["src/qturtle"]
+sources = ["src/qturtle_app"]
 requires = ["pyside6-essentials>=6.4.0"]
-icon = "assets/app"
+icon = "src/assets/app"
 license-files = ["LICENSE"]
 
-[tool.briefcase.app.qturtle.windows]
+[tool.briefcase.app.qturtle_app.windows]
 requires = [
     "pyside6-essentials>=6.4.0",
     "svg-turtle>=1.0.0",

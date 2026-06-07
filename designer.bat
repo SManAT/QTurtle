@@ -1,1 +1,1 @@
-pyside6-designer src/qturtle/ui/Ui_MainWindow.ui
+pyside6-designer src/qturtle_app/ui/Ui_MainWindow.ui

@@ -69,8 +69,7 @@ if 'turtle' in _qturtle_sys.modules:
                 self._temp_path = None
 
         # Detect if script uses turtle or SVGTurtle
-        uses_turtle = ("import turtle" in code or "from turtle" in code or
-                       "SVGTurtle" in code or "svg_turtle" in code)
+        uses_turtle = "import turtle" in code or "from turtle" in code or "SVGTurtle" in code or "svg_turtle" in code
 
         # Build final code with UTF-8 setup and turtle epilog
         full_code = self.UTF8_PREFIX
@@ -114,13 +113,18 @@ _qturtle_t.Turtle.back = _qturtle_track_backward
 
         # Make qturtle package importable in the subprocess
         env = QProcessEnvironment.systemEnvironment()
-        existing = env.value('PYTHONPATH', '')
-        # parent of the qturtle package dir works for source, PyInstaller, and Briefcase
+        existing = env.value("PYTHONPATH", "")
         pkg_root = str(Path(__file__).parent.parent)
         extra = [pkg_root]
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            extra.insert(0, sys._MEIPASS)
-        env.insert('PYTHONPATH', ';'.join(filter(None, extra + [existing])))
+        if getattr(sys, "frozen", False):
+            if hasattr(sys, "_MEIPASS"):
+                extra.insert(0, sys._MEIPASS)  # pyright: ignore[reportAttributeAccessIssue]
+            else:
+                exe_dir = str(Path(sys.executable).parent)
+                if exe_dir not in extra:
+                    extra.insert(0, exe_dir)
+        pythonpath = ";".join(filter(None, extra + [existing]))
+        env.insert("PYTHONPATH", pythonpath)
         self._process.setProcessEnvironment(env)
 
         # Start process
@@ -134,28 +138,28 @@ _qturtle_t.Turtle.back = _qturtle_track_backward
     def _find_python() -> str:
         """Return a Python interpreter path safe for subprocess use.
 
-        sys.executable is the app stub in PyInstaller and Briefcase bundles,
+        sys.executable is the app stub in PyInstaller, Nuitka, and Briefcase bundles,
         not the Python interpreter — launching it would open a second app window.
         """
         exe = Path(sys.executable)
         # Source / normal Python: executable is already python/pythonw
-        if exe.stem.lower().startswith('python'):
+        if exe.stem.lower().startswith("python"):
             return str(exe)
 
         # PyInstaller onedir: check _MEIPASS for a bundled python.exe
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            bundled = Path(sys._MEIPASS) / 'python.exe'
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+            bundled = Path(sys._MEIPASS) / "python.exe"  # pyright: ignore[reportAttributeAccessIssue]
             if bundled.exists():
                 return str(bundled)
 
         # Briefcase: support/python.exe sits one or two levels up from the launcher
         for base in (exe.parent, exe.parent.parent):
-            candidate = base / 'support' / 'python.exe'
+            candidate = base / "support" / "python.exe"
             if candidate.exists():
                 return str(candidate)
 
-        # Last resort: system Python in PATH
-        return shutil.which('python') or shutil.which('python3') or ''
+        # Nuitka standalone: no bundled python.exe; use system Python
+        return shutil.which("python") or shutil.which("python3") or ""
 
     def stop(self):
         if self._process is not None:
@@ -171,19 +175,27 @@ _qturtle_t.Turtle.back = _qturtle_track_backward
     def _on_stdout(self):
         if self._process is None:
             return
-        data = self._process.readAllStandardOutput().data().decode("utf-8", errors="replace")
+        data = self._process.readAllStandardOutput().data().decode("utf-8", errors="replace")  # pyright: ignore[reportAttributeAccessIssue]
         self.output_received.emit(data)
 
     def _on_stderr(self):
         if self._process is None:
             return
-        data = self._process.readAllStandardError().data().decode("utf-8", errors="replace")
+        data = self._process.readAllStandardError().data().decode("utf-8", errors="replace")  # pyright: ignore[reportAttributeAccessIssue]
         self.error_received.emit(data)
 
     def _on_finished(self, exit_code, exit_status):
+        # Flush any remaining output that arrived with the exit signal
+        if self._process is not None:
+            remaining = self._process.readAllStandardOutput().data().decode("utf-8", errors="replace")  # pyright: ignore[reportAttributeAccessIssue]
+            if remaining:
+                self.output_received.emit(remaining)
+            remaining_err = self._process.readAllStandardError().data().decode("utf-8", errors="replace")  # pyright: ignore[reportAttributeAccessIssue]
+            if remaining_err:
+                self.error_received.emit(remaining_err)
+
         self.finished_with_code.emit(exit_code)
 
-        # Clean up temp file
         if self._temp_path and os.path.exists(self._temp_path):
             try:
                 os.remove(self._temp_path)

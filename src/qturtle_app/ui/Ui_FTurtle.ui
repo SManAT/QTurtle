@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>FTurtleWindow</class>
+ <widget class="QMainWindow" name="FTurtleWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -30,6 +30,88 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>5</number>
+      </property>
+      <property name="topMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>5</number>
+      </property>
+      <property name="bottomMargin">
+       <number>5</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="btnRun">
+        <property name="styleSheet">
+         <string notr="true">background:
+    QLinearGradient( spread:pad, x1: 0, y1: 0,
+                     x2: 0, y2: 1,
+                     stop: 0 #f0ff35,
+                     stop: 1 #a9ff00
+    ),
+    QRadialGradient( cx: 0.5, cy: -0.4, radius: 2.0,
+                     stop: 0 #b8ee36,
+                     stop: 0.45 #b8ee36,
+                     stop: 0.5 #80c800,
+                     stop: 1 #80c800
+    );
+background-radius: 6, 5;
+background-insets: 0, 1;
+text-fill: #395306;
+</string>
+        </property>
+        <property name="text">
+         <string>Run Script</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="openMainButton">
+        <property name="styleSheet">
+         <string notr="true">background:
+    QLinearGradient( spread:pad, x1: 0, y1: 0,
+                     x2: 0, y2: 1,
+                     stop: 0 #f0ff35,
+                     stop: 1 #a9ff00
+    ),
+    QRadialGradient( cx: 0.5, cy: -0.4, radius: 2.0,
+                     stop: 0 #b8ee36,
+                     stop: 0.45 #b8ee36,
+                     stop: 0.5 #80c800,
+                     stop: 1 #80c800
+    );
+background-radius: 6, 5;
+background-insets: 0, 1;
+text-fill: #395306;
+</string>
+        </property>
+        <property name="text">
+         <string>Open Turtle</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -104,28 +186,6 @@
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuRun"/>
-  </widget>
-  <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>16</width>
-     <height>16</height>
-    </size>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionNew"/>
-   <addaction name="actionOpen"/>
-   <addaction name="actionSave"/>
-   <addaction name="separator"/>
-   <addaction name="actionRun"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionNew">
@@ -221,7 +281,7 @@
   <customwidget>
    <class>CodeEditor</class>
    <extends>QPlainTextEdit</extends>
-   <header>qturtle.editor</header>
+   <header>qturtle_app.editor</header>
   </customwidget>
  </customwidgets>
  <resources/>

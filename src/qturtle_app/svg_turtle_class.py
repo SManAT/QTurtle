@@ -42,7 +42,6 @@ class SVG_Turtle_Output:
         width, height = self.size
 
         self.svg = SvgTurtle(width, height)
-        print(f"✓ SVG Turtle created - will save to: {self.filename}")
 
     def __del__(self):
         """Auto-save SVG when object is destroyed"""

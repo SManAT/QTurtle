@@ -16,11 +16,12 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QMainWindow, QMenu, QMenuBar,
-    QPlainTextEdit, QSizePolicy, QSplitter, QStatusBar,
-    QToolBar, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QMainWindow, QMenu,
+    QMenuBar, QPlainTextEdit, QPushButton, QSizePolicy,
+    QSpacerItem, QSplitter, QStatusBar, QVBoxLayout,
+    QWidget)
 
-from qturtle.editor import CodeEditor
+from qturtle_app.editor import CodeEditor
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -55,6 +56,49 @@ class Ui_MainWindow(object):
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setSpacing(0)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(5, 5, 5, 5)
+        self.btnRun = QPushButton(self.centralwidget)
+        self.btnRun.setObjectName(u"btnRun")
+        self.btnRun.setStyleSheet(u"background: rgba(0,0,0,0.08),\n"
+"           QLinearGradient(spread:pad, x1:0, y1:0, x2:0, y2:1,\n"
+"                          stop:0 #9a9a9a, stop:1 #909090),\n"
+"           QLinearGradient(spread:pad, x1:0, y1:0, x2:0, y2:1,\n"
+"                          stop:0 white, stop:0.5 #f3f3f3,\n"
+"                          stop:0.51 #ececec, stop:1 #f2f2f2);\n"
+"background-insets: 0,0,1;\n"
+"background-radius: 5,5,4;\n"
+"padding: 3 30 3 30;\n"
+"color: #242d35;\n"
+"font-size: 12px;")
+
+        self.horizontalLayout.addWidget(self.btnRun)
+
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout.addItem(self.horizontalSpacer)
+
+        self.openFTurtleButton = QPushButton(self.centralwidget)
+        self.openFTurtleButton.setObjectName(u"openFTurtleButton")
+        self.openFTurtleButton.setStyleSheet(u"background: rgba(0,0,0,0.08),\n"
+"           QLinearGradient(spread:pad, x1:0, y1:0, x2:0, y2:1,\n"
+"                          stop:0 #9a9a9a, stop:1 #909090),\n"
+"           QLinearGradient(spread:pad, x1:0, y1:0, x2:0, y2:1,\n"
+"                          stop:0 white, stop:0.5 #f3f3f3,\n"
+"                          stop:0.51 #ececec, stop:1 #f2f2f2);\n"
+"background-insets: 0,0,1;\n"
+"background-radius: 5,5,4;\n"
+"padding: 3 30 3 30;\n"
+"color: #242d35;\n"
+"font-size: 12px;")
+
+        self.horizontalLayout.addWidget(self.openFTurtleButton)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout)
+
         self.splitter = QSplitter(self.centralwidget)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Orientation.Vertical)
@@ -90,10 +134,6 @@ class Ui_MainWindow(object):
         self.menuRun = QMenu(self.menubar)
         self.menuRun.setObjectName(u"menuRun")
         MainWindow.setMenuBar(self.menubar)
-        self.toolBar = QToolBar(MainWindow)
-        self.toolBar.setObjectName(u"toolBar")
-        self.toolBar.setIconSize(QSize(16, 16))
-        MainWindow.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolBar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
@@ -114,11 +154,6 @@ class Ui_MainWindow(object):
         self.menuEdit.addAction(self.actionSelect_All)
         self.menuRun.addAction(self.actionRun)
         self.menuRun.addAction(self.actionStop)
-        self.toolBar.addAction(self.actionNew)
-        self.toolBar.addAction(self.actionOpen)
-        self.toolBar.addAction(self.actionSave)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.actionRun)
 
         self.retranslateUi(MainWindow)
 
@@ -171,10 +206,11 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(shortcut)
         self.actionStop.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+F2", None))
 #endif // QT_CONFIG(shortcut)
+        self.btnRun.setText(QCoreApplication.translate("MainWindow", u"Run Script", None))
+        self.openFTurtleButton.setText(QCoreApplication.translate("MainWindow", u"Open FTurtle", None))
         self.consoleOutput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Console output...", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"&Datei", None))
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"&Bearbeiten", None))
         self.menuRun.setTitle(QCoreApplication.translate("MainWindow", u"&Run", None))
-        self.toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
     # retranslateUi
 

@@ -66,7 +66,7 @@ if errorlevel 1 (
 
 REM UPX is optional: reduces executable size via compression
 REM Download from https://upx.github.io/ and place upx.exe in PATH,
-REM or set upx_dir in pyproject.toml [tool.qturtle.build]
+REM or set upx_dir in pyproject.toml [tool.qturtle_app.build]
 where upx >nul 2>&1
 if errorlevel 1 (
     echo Note: UPX not found in PATH - compression will be skipped
@@ -84,6 +84,8 @@ if errorlevel 1 (
     exit /b 1
 )
 echo All dependencies ready
+
+if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"
 
 REM Build
 echo.

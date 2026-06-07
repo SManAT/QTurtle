@@ -4,7 +4,7 @@ REM Build with Briefcase and copy output to dist folder
 setlocal enabledelayedexpansion
 
 set "FORMAL_NAME=QTurtle"
-set "APP_ID=qturtle"
+set "APP_ID=qturtle_app"
 set "BRIEFCASE_SOURCE=build\%APP_ID%\windows\app\src"
 set "OUTPUT_DIR=dist\%FORMAL_NAME%Briefcase"
 
@@ -71,6 +71,8 @@ if exist build rmdir /s /q build
 if exist __pycache__ rmdir /s /q __pycache__
 if exist src\%APP_ID%\__pycache__ rmdir /s /q src\%APP_ID%\__pycache__
 echo.
+
+if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"
 
 echo Creating Briefcase project structure...
 call briefcase create windows
