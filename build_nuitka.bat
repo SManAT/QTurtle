@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 set "OUTPUT_DIR=dist\QTurtleNuitka"
-set "NUITKA_TEMP=dist\_nuitka_build"
+set "NUITKA_TEMP=build\_nuitka_build"
 
 echo ================================================
 echo Building App with Nuitka
@@ -11,7 +11,7 @@ echo.
 echo What will be done:
 echo  1. Check/install Nuitka (and ordered-set for faster compilation)
 echo  2. Compile QTurtle to standalone executable
-echo  3. Output: %OUTPUT_DIR%\QTurtle.exe
+echo  3. Output: %OUTPUT_DIR%\
 echo.
 echo  Note: Nuitka compiles Python to C, then to native code.
 echo        First run downloads the C compiler - may take extra time.
