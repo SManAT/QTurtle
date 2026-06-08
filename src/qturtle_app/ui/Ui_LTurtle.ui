@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FTurtleWindow</class>
- <widget class="QMainWindow" name="FTurtleWindow">
+ <class>LTurtleWindow</class>
+ <widget class="QMainWindow" name="LTurtleWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>678</width>
-    <height>427</height>
+    <height>562</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>QTurtle</string>
+   <string>QLTurtle</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -62,9 +62,7 @@
                      stop: 0.5 #80c800,
                      stop: 1 #80c800
     );
-background-radius: 6, 5;
-background-insets: 0, 1;
-text-fill: #395306;
+padding: 3 30 3 30;
 </string>
         </property>
         <property name="text">
@@ -100,9 +98,7 @@ text-fill: #395306;
                      stop: 0.5 #80c800,
                      stop: 1 #80c800
     );
-background-radius: 6, 5;
-background-insets: 0, 1;
-text-fill: #395306;
+padding: 3 30 3 30;
 </string>
         </property>
         <property name="text">
@@ -120,13 +116,208 @@ text-fill: #395306;
       <property name="childrenCollapsible">
        <bool>false</bool>
       </property>
-      <widget class="CodeEditor" name="codeEditor">
+      <widget class="QGroupBox" name="LSystemForm">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
          <verstretch>3</verstretch>
         </sizepolicy>
        </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:11pt;</string>
+       </property>
+       <property name="title">
+        <string>Lindenmayer System</string>
+       </property>
+       <layout class="QFormLayout" name="formLayout">
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="winkel">
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>359</number>
+          </property>
+          <property name="value">
+           <number>90</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_iterations">
+          <property name="text">
+           <string>Iterationen:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="iterationen">
+          <property name="minimum">
+           <number>2</number>
+          </property>
+          <property name="maximum">
+           <number>10</number>
+          </property>
+          <property name="value">
+           <number>2</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_length">
+          <property name="text">
+           <string>Linienlänge:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QDoubleSpinBox" name="laenge">
+          <property name="decimals">
+           <number>0</number>
+          </property>
+          <property name="minimum">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="2">
+         <widget class="QLabel" name="label_rules_header">
+          <property name="text">
+           <string>Regeln: muss &gt; beinhalten</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_rule_a">
+          <property name="text">
+           <string>Rule A:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLineEdit" name="ruleA">
+          <property name="text">
+           <string>X &gt; X+YF+</string>
+          </property>
+          <property name="placeholderText">
+           <string>e.g., A</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_rule_b">
+          <property name="text">
+           <string>Rule B:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QLineEdit" name="ruleB">
+          <property name="text">
+           <string>Y &gt; -FX-Y</string>
+          </property>
+          <property name="placeholderText">
+           <string>e.g., B</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="label_rule_c">
+          <property name="text">
+           <string>Rule C:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <widget class="QLineEdit" name="ruleC">
+          <property name="placeholderText">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0">
+         <widget class="QLabel" name="label_rule_d">
+          <property name="text">
+           <string>Rule D:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="1">
+         <widget class="QLineEdit" name="ruleD">
+          <property name="placeholderText">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="0">
+         <widget class="QLabel" name="label_rule_e">
+          <property name="text">
+           <string>Rule E:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="1">
+         <widget class="QLineEdit" name="ruleE">
+          <property name="placeholderText">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="0">
+         <widget class="QLabel" name="label_rule_f">
+          <property name="text">
+           <string>Rule F:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="1">
+         <widget class="QLineEdit" name="ruleF">
+          <property name="placeholderText">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="11" column="0" colspan="2">
+         <widget class="QLabel" name="label_legend">
+          <property name="styleSheet">
+           <string>color: gray;</string>
+          </property>
+          <property name="text">
+           <string>Legende:  + = Winkel°   - = -Winkel°   [ = push   ] = pop   F = forward</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_angle">
+          <property name="text">
+           <string>Winkel (°):</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Axiom:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="axiom">
+          <property name="text">
+           <string>X</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QPlainTextEdit" name="consoleOutput">
        <property name="sizePolicy">
@@ -277,13 +468,6 @@ text-fill: #395306;
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>CodeEditor</class>
-   <extends>QPlainTextEdit</extends>
-   <header>qturtle_app.editor</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

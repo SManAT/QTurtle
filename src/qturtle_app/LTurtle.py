@@ -1,11 +1,11 @@
+import json
 import sys
 from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QFont, QIcon, QPixmap, QScreen, QTextCharFormat
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMessageBox
-from qturtle_app.ui.Ui_MainWindow import Ui_MainWindow
-from qturtle_app.LTurtle import LTurtleWindow
+from qturtle_app.ui.Ui_LTurtle import Ui_LTurtleWindow
 
 from qturtle_app.runner import ScriptRunner
 
@@ -19,38 +19,18 @@ if sys.platform == "win32":
         pass
 
 
-DEFAULT_CODE = """\
-from qturtle_app.svg_turtle_class import SVGTurtle
+class LTurtleWindow(QMainWindow):
 
-# Turtle erstellen und konfigurieren
-t = SVGTurtle(width=400, height=400, filename=\"01_square.svg\", bgcolor=\"lightblue\")
-t.shape(\"turtle\")
-t.color(\"green\")
-t.speed(3)
-
-# Quadrat zeichnen
-for i in range(4):
-    t.forward(100)
-    t.right(90)
-
-t.save_svg()
-"""
-
-
-class MainWindow(QMainWindow):
-
-    def __init__(self):
+    def __init__(self, main_window: QMainWindow):
         super().__init__()
+        self.main_window = main_window
         self.rootDir = Path(__file__).parent
         self.current_file = None
 
         # Setup UI
-        self.ui = Ui_MainWindow()
+        self.ui = Ui_LTurtleWindow()
         self.ui.setupUi(self)
         self.load_stylesheet("styles.css")
-
-        # Configure editor
-        self.ui.codeEditor.setDefaultCode(DEFAULT_CODE)
 
         # Configure console output
         self._setup_console()
@@ -63,10 +43,6 @@ class MainWindow(QMainWindow):
 
         # Connect UI actions
         self._connect_actions()
-
-        # Connect editor signals
-        self.ui.codeEditor.document().modificationChanged.connect(self._on_modification_changed)
-        self.ui.codeEditor.cursorPositionChanged.connect(self._update_status_bar)
 
         self._update_title()
 
@@ -111,26 +87,70 @@ class MainWindow(QMainWindow):
         self.ui.actionSave.triggered.connect(self.save_file)
         self.ui.actionSave_As.triggered.connect(self.save_file_as)
         self.ui.actionExit.triggered.connect(self.close)
-        self.ui.actionCut.triggered.connect(self.ui.codeEditor.cut)
-        self.ui.actionCopy.triggered.connect(self.ui.codeEditor.copy)
-        self.ui.actionPaste.triggered.connect(self.ui.codeEditor.paste)
-        self.ui.actionSelect_All.triggered.connect(self.ui.codeEditor.selectAll)
         self.ui.actionRun.triggered.connect(self.run_script)
         self.ui.actionStop.triggered.connect(self.stop_script)
         # Buttons
-        self.ui.btnRun.clicked.connect(self.run_script)
-        self.ui.openLTurtleButton.clicked.connect(self.open_lturtle_window)
+        self.ui.openMainButton.clicked.connect(self.open_main_window)
+
+    def open_main_window(self):
+        self.main_window.show()
+        self.close()
 
     def _update_title(self):
         name = self.current_file.name if self.current_file else "Untitled"
-        modified = " *" if self.ui.codeEditor.document().isModified() else ""
-        self.setWindowTitle(f"QTurtle -{name}{modified}")
+        self.setWindowTitle(f"QTurtle (LTurtle) - {name}")
 
-    def _update_status_bar(self):
-        cursor = self.ui.codeEditor.textCursor()
-        line = cursor.blockNumber() + 1
-        col = cursor.columnNumber() + 1
-        self.statusBar().showMessage(f"Line {line}, Col {col}")
+    def _generate_lsystem_code(self):
+        angle = self.ui.winkel.value()
+        iterations = self.ui.iterationen.value()
+        length = self.ui.laenge.value()
+        axiom = self.ui.axiom.text()
+        rules = {}
+        for char, widget in [("A", self.ui.ruleA), ("B", self.ui.ruleB), ("C", self.ui.ruleC), ("D", self.ui.ruleD), ("E", self.ui.ruleE), ("F", self.ui.ruleF)]:
+            rule = widget.text()
+            if rule:
+                rules[char] = rule
+
+        code = f"""\
+from qturtle_app.svg_turtle_class import SVGTurtle
+import math
+
+t = SVGTurtle(width=800, height=800, filename="lsystem.svg", bgcolor="white")
+t.speed(0)
+
+axiom = "{axiom}"
+rules = {rules}
+angle = {angle}
+length = {length}
+
+current = axiom
+for _ in range({iterations}):
+    next_gen = ""
+    for char in current:
+        next_gen += rules.get(char, char)
+    current = next_gen
+
+stack = []
+for char in current:
+    if char == '+':
+        t.right(90)
+    elif char == '-':
+        t.left(90)
+    elif char == '[':
+        stack.append((t.xcor(), t.ycor(), t.heading()))
+    elif char == ']':
+        if stack:
+            x, y, heading = stack.pop()
+            t.penup()
+            t.goto(x, y)
+            t.setheading(heading)
+            t.pendown()
+    elif char in rules:
+        t.forward({length})
+
+t.save_svg()
+"""
+        return code
 
     def _on_modification_changed(self, changed):
         self._update_title()
@@ -138,7 +158,6 @@ class MainWindow(QMainWindow):
     def new(self):
         if not self._maybe_save():
             return
-        self.ui.codeEditor.setDefaultCode(DEFAULT_CODE)
         self.current_file = None
         self._update_title()
 
@@ -146,14 +165,22 @@ class MainWindow(QMainWindow):
         if not self._maybe_save():
             return
 
-        path, _ = QFileDialog.getOpenFileName(self, "Open Python File", str(Path.home()), "Python Files (*.py);;All Files (*)")
+        path, _ = QFileDialog.getOpenFileName(self, "Open L-System File", str(Path.home()), "L-System Files (*.lsys);;JSON Files (*.json);;All Files (*)")
         if not path:
             return
 
         try:
-            text = Path(path).read_text(encoding="utf-8")
-            self.ui.codeEditor.setPlainText(text)
-            self.ui.codeEditor.document().setModified(False)
+            data = json.loads(Path(path).read_text(encoding="utf-8"))
+            self.ui.winkel.setValue(data.get("angle", 0))
+            self.ui.iterationen.setValue(data.get("iterations", 1))
+            self.ui.laenge.setValue(data.get("length", 10.0))
+            self.ui.axiom.setText(data.get("axiom", "X"))
+            self.ui.ruleA.setText(data.get("ruleA", ""))
+            self.ui.ruleB.setText(data.get("ruleB", ""))
+            self.ui.ruleC.setText(data.get("ruleC", ""))
+            self.ui.ruleD.setText(data.get("ruleD", ""))
+            self.ui.ruleE.setText(data.get("ruleE", ""))
+            self.ui.ruleF.setText(data.get("ruleF", ""))
             self.current_file = Path(path)
             self._update_title()
         except Exception as e:
@@ -164,8 +191,19 @@ class MainWindow(QMainWindow):
             return self.save_file_as()
 
         try:
-            self.current_file.write_text(self.ui.codeEditor.toPlainText(), encoding="utf-8")
-            self.ui.codeEditor.document().setModified(False)
+            data = {
+                "angle": self.ui.winkel.value(),
+                "iterations": self.ui.iterationen.value(),
+                "length": self.ui.laenge.value(),
+                "axiom": self.ui.axiom.text(),
+                "ruleA": self.ui.ruleA.text(),
+                "ruleB": self.ui.ruleB.text(),
+                "ruleC": self.ui.ruleC.text(),
+                "ruleD": self.ui.ruleD.text(),
+                "ruleE": self.ui.ruleE.text(),
+                "ruleF": self.ui.ruleF.text(),
+            }
+            self.current_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
             self._update_title()
             return True
         except Exception as e:
@@ -173,7 +211,7 @@ class MainWindow(QMainWindow):
             return False
 
     def save_file_as(self):
-        path, _ = QFileDialog.getSaveFileName(self, "Save Python File", str(self.current_file or Path.home() / "untitled.py"), "Python Files (*.py);;All Files (*)")
+        path, _ = QFileDialog.getSaveFileName(self, "Save L-System File", str(self.current_file or Path.home() / "untitled.lsys"), "L-System Files (*.lsys);;JSON Files (*.json);;All Files (*)")
         if not path:
             return False
 
@@ -181,33 +219,16 @@ class MainWindow(QMainWindow):
         return self.save_file()
 
     def _maybe_save(self):
-        if not self.ui.codeEditor.document().isModified():
-            return True
-
-        reply = QMessageBox.warning(
-            self,
-            "Unsaved Changes",
-            "The document has been modified.\nDo you want to save the changes?",
-            QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
-            QMessageBox.StandardButton.Save,
-        )
-
-        if reply == QMessageBox.StandardButton.Save:
-            return self.save_file()
-        elif reply == QMessageBox.StandardButton.Discard:
-            return True
-        else:
-            return False
+        return True
 
     def run_script(self):
         self.ui.consoleOutput.clear()
-        self.ui.consoleOutput.appendPlainText("--- Running ---\n")
-        code = self.ui.codeEditor.toPlainText()
+        self.ui.consoleOutput.appendPlainText("--- Running L-System ---\n")
+        code = self._generate_lsystem_code()
         self.runner.run(code)
 
     def stop_script(self):
         self.runner.stop()
-        # Force paint/update the window before cleanup
         self.ui.consoleOutput.appendPlainText("\n--- Stopped ---")
         QApplication.processEvents()
 
@@ -230,11 +251,6 @@ class MainWindow(QMainWindow):
         else:
             self.ui.consoleOutput.appendPlainText(f"--- Done ---")
 
-    def open_lturtle_window(self):
-        self.lturtle_window: LTurtleWindow = LTurtleWindow(self)
-        self.lturtle_window.show()
-        self.hide()
-
     def closeEvent(self, event):
         if self._maybe_save():
             event.accept()
@@ -249,13 +265,3 @@ class MainWindow(QMainWindow):
                 self.setStyleSheet(stylesheet)
         except FileNotFoundError:
             print(f"CSS file '{css_path}' not found")
-
-
-def main():
-    app = QApplication(sys.argv)
-    main_window = MainWindow()
-    return app.exec()
-
-
-if __name__ == "__main__":
-    sys.exit(main())

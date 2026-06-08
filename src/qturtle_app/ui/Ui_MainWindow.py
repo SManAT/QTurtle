@@ -68,8 +68,6 @@ class Ui_MainWindow(object):
 "           QLinearGradient(spread:pad, x1:0, y1:0, x2:0, y2:1,\n"
 "                          stop:0 white, stop:0.5 #f3f3f3,\n"
 "                          stop:0.51 #ececec, stop:1 #f2f2f2);\n"
-"background-insets: 0,0,1;\n"
-"background-radius: 5,5,4;\n"
 "padding: 3 30 3 30;\n"
 "color: #242d35;\n"
 "font-size: 12px;")
@@ -80,21 +78,19 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addItem(self.horizontalSpacer)
 
-        self.openFTurtleButton = QPushButton(self.centralwidget)
-        self.openFTurtleButton.setObjectName(u"openFTurtleButton")
-        self.openFTurtleButton.setStyleSheet(u"background: rgba(0,0,0,0.08),\n"
+        self.openLTurtleButton = QPushButton(self.centralwidget)
+        self.openLTurtleButton.setObjectName(u"openLTurtleButton")
+        self.openLTurtleButton.setStyleSheet(u"background: rgba(0,0,0,0.08),\n"
 "           QLinearGradient(spread:pad, x1:0, y1:0, x2:0, y2:1,\n"
 "                          stop:0 #9a9a9a, stop:1 #909090),\n"
 "           QLinearGradient(spread:pad, x1:0, y1:0, x2:0, y2:1,\n"
 "                          stop:0 white, stop:0.5 #f3f3f3,\n"
 "                          stop:0.51 #ececec, stop:1 #f2f2f2);\n"
-"background-insets: 0,0,1;\n"
-"background-radius: 5,5,4;\n"
 "padding: 3 30 3 30;\n"
 "color: #242d35;\n"
 "font-size: 12px;")
 
-        self.horizontalLayout.addWidget(self.openFTurtleButton)
+        self.horizontalLayout.addWidget(self.openLTurtleButton)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -207,7 +203,7 @@ class Ui_MainWindow(object):
         self.actionStop.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+F2", None))
 #endif // QT_CONFIG(shortcut)
         self.btnRun.setText(QCoreApplication.translate("MainWindow", u"Run Script", None))
-        self.openFTurtleButton.setText(QCoreApplication.translate("MainWindow", u"Open FTurtle", None))
+        self.openLTurtleButton.setText(QCoreApplication.translate("MainWindow", u"Open L Turtle", None))
         self.consoleOutput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Console output...", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"&Datei", None))
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"&Bearbeiten", None))
