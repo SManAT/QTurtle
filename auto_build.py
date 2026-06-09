@@ -163,6 +163,39 @@ def build_config_to_args(config):
     return args
 
 
+def add_python_interpreter(args: list, sep: str) -> tuple:
+    """Bundle the current python.exe into _internal/ for subprocess script execution.
+
+    Also writes a python3XX._pth file next to it so the bundled interpreter can
+    resolve stdlib from _internal/ (base_library.zip + individual .pyc files).
+    Returns (updated_args, list_of_temp_files_to_clean_up).
+    """
+    cleanup = []
+    python_exe = Path(sys.executable)
+
+    if not python_exe.exists() or not python_exe.stem.lower().startswith("python"):
+        print("⚠️  WARNING: sys.executable does not look like Python, skipping interpreter bundling")
+        return args, cleanup
+
+    args = list(args)
+    args.append(f"--add-binary={python_exe}{sep}.")
+
+    # A ._pth file next to python.exe in _internal/ overrides default sys.path.
+    # "."            → _internal/ itself (all .pyc files PyInstaller placed there)
+    # base_library.zip → PyInstaller's bootstrap zip (abc, codecs, io, …)
+    ver = f"{sys.version_info.major}{sys.version_info.minor}"
+    pth_name = f"python{ver}._pth"
+    pth_path = Path(pth_name)
+    # "import site" re-enables PYTHONPATH processing (._pth files disable it by default)
+    pth_path.write_text(".\nbase_library.zip\nimport site\n", encoding="utf-8")
+    args.append(f"--add-data={pth_path}{sep}.")
+    cleanup.append(str(pth_path))
+
+    print(f"  Bundling interpreter : {python_exe}")
+    print(f"  Stdlib path config   : {pth_name}")
+    return args, cleanup
+
+
 def parse_args():
     """Parse --app=<name> from sys.argv, return app name or None."""
     for arg in sys.argv[1:]:
@@ -191,9 +224,22 @@ def build():
     get_python_env()
 
     args = build_config_to_args(config)
+    sep = ";" if sys.platform == "win32" else ":"
 
-    print("🔨 Building with PyInstaller...\n")
-    PyInstaller.__main__.run(args)
+    cleanup_files = []
+    if config.get("include_python_interpreter", False):
+        print("\n🐍 Bundling Python interpreter for subprocess execution...")
+        args, cleanup_files = add_python_interpreter(args, sep)
+
+    try:
+        print("\n🔨 Building with PyInstaller...\n")
+        PyInstaller.__main__.run(args)
+    finally:
+        for f in cleanup_files:
+            try:
+                Path(f).unlink(missing_ok=True)
+            except Exception:
+                pass
 
     output_dir = config.get("output_dir", "dist")
     print(f"\n✅ Build complete!")

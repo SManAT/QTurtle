@@ -120,9 +120,12 @@ _qturtle_t.Turtle.back = _qturtle_track_backward
             if hasattr(sys, "_MEIPASS"):
                 extra.insert(0, sys._MEIPASS)  # pyright: ignore[reportAttributeAccessIssue]
             else:
-                exe_dir = str(Path(sys.executable).parent)
-                if exe_dir not in extra:
-                    extra.insert(0, exe_dir)
+                exe_dir = Path(sys.executable).parent
+                extra.insert(0, str(exe_dir))
+                # cx_Freeze stores packages in lib/ subdirectory
+                lib_dir = exe_dir / "lib"
+                if lib_dir.exists():
+                    extra.insert(0, str(lib_dir))
         pythonpath = ";".join(filter(None, extra + [existing]))
         env.insert("PYTHONPATH", pythonpath)
         self._process.setProcessEnvironment(env)
@@ -158,7 +161,13 @@ _qturtle_t.Turtle.back = _qturtle_track_backward
             if candidate.exists():
                 return str(candidate)
 
-        # Nuitka standalone: no bundled python.exe; use system Python
+        # cx_Freeze and similar: python.exe placed next to the app executable
+        if getattr(sys, "frozen", False):
+            candidate = exe.parent / "python.exe"
+            if candidate.exists():
+                return str(candidate)
+
+        # No bundled interpreter found; fall back to system Python
         return shutil.which("python") or shutil.which("python3") or ""
 
     def stop(self):

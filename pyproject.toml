@@ -61,14 +61,18 @@ hidden_imports = [
     "qturtle_app.svg_turtle_class",
     "qturtle_app.ui.Ui_MainWindow",
 ]
-collect_all = []
+collect_all = ["tkinter"]  # pulls in _tkinter.pyd + Tcl/Tk DLLs needed by turtle subprocesses
+include_python_interpreter = true  # bundle python.exe into _internal/ for subprocess script execution
 strip = true   # Strip debug symbols (Unix only, ignored on Windows)
 upx = true     # UPX compression: true = use if upx in PATH, false = --noupx
 upx_dir = "C:/upx"  # Path to upx.exe directory (optional, if not in PATH)
 # DLLs that UPX cannot compress on Windows — add more if you see "Failed to upx" warnings
 upx_exclude = [
+    "python.exe",
+    "pythonw.exe",
     "python3.dll",
     "python312.dll",
+    "python313.dll",
     "vcruntime140.dll",
     "vcruntime140_1.dll",
     "msvcp140.dll",
@@ -86,7 +90,6 @@ exclude_modules = [
     "IPython",
     "jupyter",
     "notebook",
-    "tkinter",
     "test",
     "unittest",
     "doctest",
