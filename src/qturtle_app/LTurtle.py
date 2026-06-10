@@ -1,10 +1,13 @@
 import json
 import sys
+import re
 from pathlib import Path
+from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QFont, QIcon, QPixmap, QScreen, QTextCharFormat
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMessageBox
+from qturtle_app.L_system_class import LSystem
 from qturtle_app.ui.Ui_LTurtle import Ui_LTurtleWindow
 
 from qturtle_app.runner import ScriptRunner
@@ -21,15 +24,18 @@ if sys.platform == "win32":
 
 class LTurtleWindow(QMainWindow):
 
-    def __init__(self, main_window: QMainWindow):
+    def __init__(self, main_window: QMainWindow, saveDir: Path):
         super().__init__()
         self.main_window = main_window
         self.rootDir = Path(__file__).parent
         self.current_file = None
+        self.saveDir = saveDir
 
         # Setup UI
         self.ui = Ui_LTurtleWindow()
         self.ui.setupUi(self)
+        self.ui.topSplitter.setSizes([300, 700])
+        self.ui.mainSplitter.setSizes([450, 150])
         self.load_stylesheet("styles.css")
 
         # Configure console output
@@ -91,6 +97,7 @@ class LTurtleWindow(QMainWindow):
         self.ui.actionStop.triggered.connect(self.stop_script)
         # Buttons
         self.ui.openMainButton.clicked.connect(self.open_main_window)
+        self.ui.btnRun.clicked.connect(self.run_script)
 
     def open_main_window(self):
         self.main_window.show()
@@ -103,16 +110,22 @@ class LTurtleWindow(QMainWindow):
     def _generate_lsystem_code(self):
         angle = self.ui.winkel.value()
         iterations = self.ui.iterationen.value()
-        length = self.ui.laenge.value()
+        length: int = self.ui.laenge.value()
         axiom = self.ui.axiom.text()
-        rules = {}
+        rules: dict[Any, Any] = {}
+
         for char, widget in [("A", self.ui.ruleA), ("B", self.ui.ruleB), ("C", self.ui.ruleC), ("D", self.ui.ruleD), ("E", self.ui.ruleE), ("F", self.ui.ruleF)]:
             rule = widget.text()
+            # split like F>F+ on >, :
+            res = re.split(r"[>:]+", rule)
             if rule:
-                rules[char] = rule
+                rules[res[0].strip()] = res[1].strip()
+
+        lsys = LSystem(angle, iterations, length, axiom, rules)
 
         code = f"""\
 from qturtle_app.svg_turtle_class import SVGTurtle
+from qturtle_app.L_system_class import LSystem
 import math
 
 t = SVGTurtle(width=800, height=800, filename="lsystem.svg", bgcolor="white")
@@ -123,30 +136,7 @@ rules = {rules}
 angle = {angle}
 length = {length}
 
-current = axiom
-for _ in range({iterations}):
-    next_gen = ""
-    for char in current:
-        next_gen += rules.get(char, char)
-    current = next_gen
 
-stack = []
-for char in current:
-    if char == '+':
-        t.right(90)
-    elif char == '-':
-        t.left(90)
-    elif char == '[':
-        stack.append((t.xcor(), t.ycor(), t.heading()))
-    elif char == ']':
-        if stack:
-            x, y, heading = stack.pop()
-            t.penup()
-            t.goto(x, y)
-            t.setheading(heading)
-            t.pendown()
-    elif char in rules:
-        t.forward({length})
 
 t.save_svg()
 """
@@ -165,7 +155,7 @@ t.save_svg()
         if not self._maybe_save():
             return
 
-        path, _ = QFileDialog.getOpenFileName(self, "Open L-System File", str(Path.home()), "L-System Files (*.lsys);;JSON Files (*.json);;All Files (*)")
+        path, _ = QFileDialog.getOpenFileName(self, "Open L-System File", str(self.saveDir), "L-System Files (*.lsys);;JSON Files (*.json);;All Files (*)")
         if not path:
             return
 
@@ -211,7 +201,7 @@ t.save_svg()
             return False
 
     def save_file_as(self):
-        path, _ = QFileDialog.getSaveFileName(self, "Save L-System File", str(self.current_file or Path.home() / "untitled.lsys"), "L-System Files (*.lsys);;JSON Files (*.json);;All Files (*)")
+        path, _ = QFileDialog.getSaveFileName(self, "Save L-System File", str(self.saveDir / "untitled.lsys"), "L-System Files (*.lsys);;JSON Files (*.json);;All Files (*)")
         if not path:
             return False
 

@@ -16,7 +16,7 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QDoubleSpinBox, QFormLayout, QGroupBox,
+from PySide6.QtWidgets import (QApplication, QFormLayout, QGridLayout, QGroupBox,
     QHBoxLayout, QLabel, QLineEdit, QMainWindow,
     QMenu, QMenuBar, QPlainTextEdit, QPushButton,
     QSizePolicy, QSpacerItem, QSpinBox, QSplitter,
@@ -26,7 +26,7 @@ class Ui_LTurtleWindow(object):
     def setupUi(self, LTurtleWindow):
         if not LTurtleWindow.objectName():
             LTurtleWindow.setObjectName(u"LTurtleWindow")
-        LTurtleWindow.resize(678, 562)
+        LTurtleWindow.resize(700, 577)
         self.actionNew = QAction(LTurtleWindow)
         self.actionNew.setObjectName(u"actionNew")
         self.actionOpen = QAction(LTurtleWindow)
@@ -104,11 +104,20 @@ class Ui_LTurtleWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.splitter = QSplitter(self.centralwidget)
-        self.splitter.setObjectName(u"splitter")
-        self.splitter.setOrientation(Qt.Orientation.Vertical)
-        self.splitter.setChildrenCollapsible(False)
-        self.LSystemForm = QGroupBox(self.splitter)
+        self.mainSplitter = QSplitter(self.centralwidget)
+        self.mainSplitter.setObjectName(u"mainSplitter")
+        self.mainSplitter.setOrientation(Qt.Orientation.Vertical)
+        self.mainSplitter.setHandleWidth(1)
+        self.topSplitter = QSplitter(self.mainSplitter)
+        self.topSplitter.setObjectName(u"topSplitter")
+        self.topSplitter.setOrientation(Qt.Orientation.Horizontal)
+        self.topSplitter.setHandleWidth(1)
+        self.topSplitter.setChildrenCollapsible(False)
+        self.widget = QWidget(self.topSplitter)
+        self.widget.setObjectName(u"widget")
+        self.gridLayout_2 = QGridLayout(self.widget)
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.LSystemForm = QGroupBox(self.widget)
         self.LSystemForm.setObjectName(u"LSystemForm")
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -116,20 +125,41 @@ class Ui_LTurtleWindow(object):
         sizePolicy.setHeightForWidth(self.LSystemForm.sizePolicy().hasHeightForWidth())
         self.LSystemForm.setSizePolicy(sizePolicy)
         self.LSystemForm.setStyleSheet(u"font-size:11pt;")
+        self.LSystemForm.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
         self.formLayout = QFormLayout(self.LSystemForm)
         self.formLayout.setObjectName(u"formLayout")
-        self.winkel = QSpinBox(self.LSystemForm)
-        self.winkel.setObjectName(u"winkel")
-        self.winkel.setMinimum(0)
-        self.winkel.setMaximum(359)
-        self.winkel.setValue(90)
+        self.gridLayout = QGridLayout()
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout.setContentsMargins(9, 9, 9, 9)
+        self.label_rule_d = QLabel(self.LSystemForm)
+        self.label_rule_d.setObjectName(u"label_rule_d")
 
-        self.formLayout.setWidget(1, QFormLayout.ItemRole.FieldRole, self.winkel)
+        self.gridLayout.addWidget(self.label_rule_d, 8, 0, 1, 1)
 
-        self.label_iterations = QLabel(self.LSystemForm)
-        self.label_iterations.setObjectName(u"label_iterations")
+        self.ruleA = QLineEdit(self.LSystemForm)
+        self.ruleA.setObjectName(u"ruleA")
 
-        self.formLayout.setWidget(2, QFormLayout.ItemRole.LabelRole, self.label_iterations)
+        self.gridLayout.addWidget(self.ruleA, 5, 1, 1, 1)
+
+        self.ruleF = QLineEdit(self.LSystemForm)
+        self.ruleF.setObjectName(u"ruleF")
+
+        self.gridLayout.addWidget(self.ruleF, 10, 1, 1, 1)
+
+        self.axiom = QLineEdit(self.LSystemForm)
+        self.axiom.setObjectName(u"axiom")
+
+        self.gridLayout.addWidget(self.axiom, 0, 1, 1, 1)
+
+        self.ruleE = QLineEdit(self.LSystemForm)
+        self.ruleE.setObjectName(u"ruleE")
+
+        self.gridLayout.addWidget(self.ruleE, 9, 1, 1, 1)
+
+        self.label_rule_c = QLabel(self.LSystemForm)
+        self.label_rule_c.setObjectName(u"label_rule_c")
+
+        self.gridLayout.addWidget(self.label_rule_c, 7, 0, 1, 1)
 
         self.iterationen = QSpinBox(self.LSystemForm)
         self.iterationen.setObjectName(u"iterationen")
@@ -137,125 +167,132 @@ class Ui_LTurtleWindow(object):
         self.iterationen.setMaximum(10)
         self.iterationen.setValue(2)
 
-        self.formLayout.setWidget(2, QFormLayout.ItemRole.FieldRole, self.iterationen)
-
-        self.label_length = QLabel(self.LSystemForm)
-        self.label_length.setObjectName(u"label_length")
-
-        self.formLayout.setWidget(3, QFormLayout.ItemRole.LabelRole, self.label_length)
-
-        self.laenge = QDoubleSpinBox(self.LSystemForm)
-        self.laenge.setObjectName(u"laenge")
-        self.laenge.setDecimals(0)
-        self.laenge.setMinimum(0.000000000000000)
-        self.laenge.setMaximum(1000.000000000000000)
-        self.laenge.setValue(10.000000000000000)
-
-        self.formLayout.setWidget(3, QFormLayout.ItemRole.FieldRole, self.laenge)
-
-        self.label_rules_header = QLabel(self.LSystemForm)
-        self.label_rules_header.setObjectName(u"label_rules_header")
-
-        self.formLayout.setWidget(4, QFormLayout.ItemRole.SpanningRole, self.label_rules_header)
-
-        self.label_rule_a = QLabel(self.LSystemForm)
-        self.label_rule_a.setObjectName(u"label_rule_a")
-
-        self.formLayout.setWidget(5, QFormLayout.ItemRole.LabelRole, self.label_rule_a)
-
-        self.ruleA = QLineEdit(self.LSystemForm)
-        self.ruleA.setObjectName(u"ruleA")
-
-        self.formLayout.setWidget(5, QFormLayout.ItemRole.FieldRole, self.ruleA)
-
-        self.label_rule_b = QLabel(self.LSystemForm)
-        self.label_rule_b.setObjectName(u"label_rule_b")
-
-        self.formLayout.setWidget(6, QFormLayout.ItemRole.LabelRole, self.label_rule_b)
+        self.gridLayout.addWidget(self.iterationen, 2, 1, 1, 1)
 
         self.ruleB = QLineEdit(self.LSystemForm)
         self.ruleB.setObjectName(u"ruleB")
 
-        self.formLayout.setWidget(6, QFormLayout.ItemRole.FieldRole, self.ruleB)
-
-        self.label_rule_c = QLabel(self.LSystemForm)
-        self.label_rule_c.setObjectName(u"label_rule_c")
-
-        self.formLayout.setWidget(7, QFormLayout.ItemRole.LabelRole, self.label_rule_c)
-
-        self.ruleC = QLineEdit(self.LSystemForm)
-        self.ruleC.setObjectName(u"ruleC")
-
-        self.formLayout.setWidget(7, QFormLayout.ItemRole.FieldRole, self.ruleC)
-
-        self.label_rule_d = QLabel(self.LSystemForm)
-        self.label_rule_d.setObjectName(u"label_rule_d")
-
-        self.formLayout.setWidget(8, QFormLayout.ItemRole.LabelRole, self.label_rule_d)
-
-        self.ruleD = QLineEdit(self.LSystemForm)
-        self.ruleD.setObjectName(u"ruleD")
-
-        self.formLayout.setWidget(8, QFormLayout.ItemRole.FieldRole, self.ruleD)
+        self.gridLayout.addWidget(self.ruleB, 6, 1, 1, 1)
 
         self.label_rule_e = QLabel(self.LSystemForm)
         self.label_rule_e.setObjectName(u"label_rule_e")
 
-        self.formLayout.setWidget(9, QFormLayout.ItemRole.LabelRole, self.label_rule_e)
-
-        self.ruleE = QLineEdit(self.LSystemForm)
-        self.ruleE.setObjectName(u"ruleE")
-
-        self.formLayout.setWidget(9, QFormLayout.ItemRole.FieldRole, self.ruleE)
-
-        self.label_rule_f = QLabel(self.LSystemForm)
-        self.label_rule_f.setObjectName(u"label_rule_f")
-
-        self.formLayout.setWidget(10, QFormLayout.ItemRole.LabelRole, self.label_rule_f)
-
-        self.ruleF = QLineEdit(self.LSystemForm)
-        self.ruleF.setObjectName(u"ruleF")
-
-        self.formLayout.setWidget(10, QFormLayout.ItemRole.FieldRole, self.ruleF)
-
-        self.label_legend = QLabel(self.LSystemForm)
-        self.label_legend.setObjectName(u"label_legend")
-        self.label_legend.setWordWrap(True)
-
-        self.formLayout.setWidget(11, QFormLayout.ItemRole.SpanningRole, self.label_legend)
-
-        self.label_angle = QLabel(self.LSystemForm)
-        self.label_angle.setObjectName(u"label_angle")
-
-        self.formLayout.setWidget(1, QFormLayout.ItemRole.LabelRole, self.label_angle)
+        self.gridLayout.addWidget(self.label_rule_e, 9, 0, 1, 1)
 
         self.label = QLabel(self.LSystemForm)
         self.label.setObjectName(u"label")
 
-        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.label)
+        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
 
-        self.axiom = QLineEdit(self.LSystemForm)
-        self.axiom.setObjectName(u"axiom")
+        self.label_length = QLabel(self.LSystemForm)
+        self.label_length.setObjectName(u"label_length")
 
-        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.axiom)
+        self.gridLayout.addWidget(self.label_length, 3, 0, 1, 1)
 
-        self.splitter.addWidget(self.LSystemForm)
-        self.consoleOutput = QPlainTextEdit(self.splitter)
-        self.consoleOutput.setObjectName(u"consoleOutput")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.label_rule_a = QLabel(self.LSystemForm)
+        self.label_rule_a.setObjectName(u"label_rule_a")
+
+        self.gridLayout.addWidget(self.label_rule_a, 5, 0, 1, 1)
+
+        self.label_iterations = QLabel(self.LSystemForm)
+        self.label_iterations.setObjectName(u"label_iterations")
+
+        self.gridLayout.addWidget(self.label_iterations, 2, 0, 1, 1)
+
+        self.winkel = QSpinBox(self.LSystemForm)
+        self.winkel.setObjectName(u"winkel")
+        self.winkel.setMinimum(0)
+        self.winkel.setMaximum(359)
+        self.winkel.setValue(90)
+
+        self.gridLayout.addWidget(self.winkel, 1, 1, 1, 1)
+
+        self.label_angle = QLabel(self.LSystemForm)
+        self.label_angle.setObjectName(u"label_angle")
+
+        self.gridLayout.addWidget(self.label_angle, 1, 0, 1, 1)
+
+        self.ruleC = QLineEdit(self.LSystemForm)
+        self.ruleC.setObjectName(u"ruleC")
+
+        self.gridLayout.addWidget(self.ruleC, 7, 1, 1, 1)
+
+        self.label_rule_f = QLabel(self.LSystemForm)
+        self.label_rule_f.setObjectName(u"label_rule_f")
+
+        self.gridLayout.addWidget(self.label_rule_f, 10, 0, 1, 1)
+
+        self.label_rules_header = QLabel(self.LSystemForm)
+        self.label_rules_header.setObjectName(u"label_rules_header")
+
+        self.gridLayout.addWidget(self.label_rules_header, 4, 0, 1, 2)
+
+        self.ruleD = QLineEdit(self.LSystemForm)
+        self.ruleD.setObjectName(u"ruleD")
+
+        self.gridLayout.addWidget(self.ruleD, 8, 1, 1, 1)
+
+        self.label_rule_b = QLabel(self.LSystemForm)
+        self.label_rule_b.setObjectName(u"label_rule_b")
+
+        self.gridLayout.addWidget(self.label_rule_b, 6, 0, 1, 1)
+
+        self.laenge = QSpinBox(self.LSystemForm)
+        self.laenge.setObjectName(u"laenge")
+        self.laenge.setMaximum(500)
+        self.laenge.setValue(100)
+
+        self.gridLayout.addWidget(self.laenge, 3, 1, 1, 1)
+
+
+        self.formLayout.setLayout(0, QFormLayout.ItemRole.SpanningRole, self.gridLayout)
+
+
+        self.gridLayout_2.addWidget(self.LSystemForm, 0, 0, 1, 1)
+
+        self.topSplitter.addWidget(self.widget)
+        self.widget21 = QWidget(self.topSplitter)
+        self.widget21.setObjectName(u"widget21")
+        self.verticalLayout_2 = QVBoxLayout(self.widget21)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_2.setContentsMargins(-1, 18, -1, -1)
+        self.rightTextArea = QPlainTextEdit(self.widget21)
+        self.rightTextArea.setObjectName(u"rightTextArea")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(1)
-        sizePolicy1.setHeightForWidth(self.consoleOutput.sizePolicy().hasHeightForWidth())
-        self.consoleOutput.setSizePolicy(sizePolicy1)
-        self.consoleOutput.setReadOnly(True)
-        self.splitter.addWidget(self.consoleOutput)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.rightTextArea.sizePolicy().hasHeightForWidth())
+        self.rightTextArea.setSizePolicy(sizePolicy1)
+        self.rightTextArea.setStyleSheet(u"background:#ffffff;")
 
-        self.verticalLayout.addWidget(self.splitter)
+        self.verticalLayout_2.addWidget(self.rightTextArea)
+
+        self.topSplitter.addWidget(self.widget21)
+        self.mainSplitter.addWidget(self.topSplitter)
+        self.widget22 = QWidget(self.mainSplitter)
+        self.widget22.setObjectName(u"widget22")
+        self.horizontalLayout_2 = QHBoxLayout(self.widget22)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.consoleOutput = QPlainTextEdit(self.widget22)
+        self.consoleOutput.setObjectName(u"consoleOutput")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(1)
+        sizePolicy2.setHeightForWidth(self.consoleOutput.sizePolicy().hasHeightForWidth())
+        self.consoleOutput.setSizePolicy(sizePolicy2)
+        self.consoleOutput.setStyleSheet(u"background:#ffffff;")
+        self.consoleOutput.setReadOnly(True)
+
+        self.horizontalLayout_2.addWidget(self.consoleOutput)
+
+        self.mainSplitter.addWidget(self.widget22)
+
+        self.verticalLayout.addWidget(self.mainSplitter)
 
         LTurtleWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(LTurtleWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 678, 33))
+        self.menubar.setGeometry(QRect(0, 0, 700, 33))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuEdit = QMenu(self.menubar)
@@ -338,28 +375,28 @@ class Ui_LTurtleWindow(object):
         self.btnRun.setText(QCoreApplication.translate("LTurtleWindow", u"Run Script", None))
         self.openMainButton.setText(QCoreApplication.translate("LTurtleWindow", u"Open Turtle", None))
         self.LSystemForm.setTitle(QCoreApplication.translate("LTurtleWindow", u"Lindenmayer System", None))
-        self.label_iterations.setText(QCoreApplication.translate("LTurtleWindow", u"Iterationen:", None))
-        self.label_length.setText(QCoreApplication.translate("LTurtleWindow", u"Linienl\u00e4nge:", None))
-        self.label_rules_header.setText(QCoreApplication.translate("LTurtleWindow", u"Regeln: muss > beinhalten", None))
-        self.label_rule_a.setText(QCoreApplication.translate("LTurtleWindow", u"Rule A:", None))
+        self.label_rule_d.setText(QCoreApplication.translate("LTurtleWindow", u"Rule D:", None))
         self.ruleA.setText(QCoreApplication.translate("LTurtleWindow", u"X > X+YF+", None))
         self.ruleA.setPlaceholderText(QCoreApplication.translate("LTurtleWindow", u"e.g., A", None))
-        self.label_rule_b.setText(QCoreApplication.translate("LTurtleWindow", u"Rule B:", None))
+        self.ruleF.setPlaceholderText("")
+        self.axiom.setText(QCoreApplication.translate("LTurtleWindow", u"X", None))
+        self.ruleE.setPlaceholderText("")
+        self.label_rule_c.setText(QCoreApplication.translate("LTurtleWindow", u"Rule C:", None))
         self.ruleB.setText(QCoreApplication.translate("LTurtleWindow", u"Y > -FX-Y", None))
         self.ruleB.setPlaceholderText(QCoreApplication.translate("LTurtleWindow", u"e.g., B", None))
-        self.label_rule_c.setText(QCoreApplication.translate("LTurtleWindow", u"Rule C:", None))
-        self.ruleC.setPlaceholderText("")
-        self.label_rule_d.setText(QCoreApplication.translate("LTurtleWindow", u"Rule D:", None))
-        self.ruleD.setPlaceholderText("")
         self.label_rule_e.setText(QCoreApplication.translate("LTurtleWindow", u"Rule E:", None))
-        self.ruleE.setPlaceholderText("")
-        self.label_rule_f.setText(QCoreApplication.translate("LTurtleWindow", u"Rule F:", None))
-        self.ruleF.setPlaceholderText("")
-        self.label_legend.setStyleSheet(QCoreApplication.translate("LTurtleWindow", u"color: gray;", None))
-        self.label_legend.setText(QCoreApplication.translate("LTurtleWindow", u"Legende:  + = Winkel\u00b0   - = -Winkel\u00b0   [ = push   ] = pop   F = forward", None))
-        self.label_angle.setText(QCoreApplication.translate("LTurtleWindow", u"Winkel (\u00b0):", None))
         self.label.setText(QCoreApplication.translate("LTurtleWindow", u"Axiom:", None))
-        self.axiom.setText(QCoreApplication.translate("LTurtleWindow", u"X", None))
+        self.label_length.setText(QCoreApplication.translate("LTurtleWindow", u"Linienl\u00e4nge:", None))
+        self.label_rule_a.setText(QCoreApplication.translate("LTurtleWindow", u"Rule A:", None))
+        self.label_iterations.setText(QCoreApplication.translate("LTurtleWindow", u"Iterationen:", None))
+        self.label_angle.setText(QCoreApplication.translate("LTurtleWindow", u"Winkel (\u00b0):", None))
+        self.ruleC.setPlaceholderText("")
+        self.label_rule_f.setText(QCoreApplication.translate("LTurtleWindow", u"Rule F:", None))
+        self.label_rules_header.setText(QCoreApplication.translate("LTurtleWindow", u"Regeln: muss > beinhalten", None))
+        self.ruleD.setPlaceholderText("")
+        self.label_rule_b.setText(QCoreApplication.translate("LTurtleWindow", u"Rule B:", None))
+        self.rightTextArea.setPlainText(QCoreApplication.translate("LTurtleWindow", u"fsgdgdgf", None))
+        self.rightTextArea.setPlaceholderText(QCoreApplication.translate("LTurtleWindow", u"Right panel...", None))
         self.consoleOutput.setPlaceholderText(QCoreApplication.translate("LTurtleWindow", u"Console output...", None))
         self.menuFile.setTitle(QCoreApplication.translate("LTurtleWindow", u"&Datei", None))
         self.menuEdit.setTitle(QCoreApplication.translate("LTurtleWindow", u"&Bearbeiten", None))

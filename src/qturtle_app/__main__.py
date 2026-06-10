@@ -1,4 +1,5 @@
 import sys
+import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt
@@ -42,6 +43,9 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.rootDir = Path(__file__).parent
+        self.saveDir = Path.joinpath(self.rootDir.parent.parent, "files")
+        self.createDir(self.saveDir)
+
         self.current_file = None
 
         # Setup UI
@@ -91,6 +95,9 @@ class MainWindow(QMainWindow):
         self.center()
 
         self.show()
+
+        # Debug
+        self.open_lturtle_window()
 
     def center(self):
         center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
@@ -142,11 +149,19 @@ class MainWindow(QMainWindow):
         self.current_file = None
         self._update_title()
 
+    def createDir(self, path):
+        """create dir if it not exists"""
+        try:
+            os.makedirs(path, exist_ok=True)
+            # print(f"Successfully created path: {path}")
+        except Exception as e:
+            print(f"Error creating path: {str(e)}")
+
     def open_file(self):
         if not self._maybe_save():
             return
 
-        path, _ = QFileDialog.getOpenFileName(self, "Open Python File", str(Path.home()), "Python Files (*.py);;All Files (*)")
+        path, _ = QFileDialog.getOpenFileName(self, "Open Python File", str(self.saveDir), "Python Files (*.py);;All Files (*)")
         if not path:
             return
 
@@ -173,7 +188,7 @@ class MainWindow(QMainWindow):
             return False
 
     def save_file_as(self):
-        path, _ = QFileDialog.getSaveFileName(self, "Save Python File", str(self.current_file or Path.home() / "untitled.py"), "Python Files (*.py);;All Files (*)")
+        path, _ = QFileDialog.getSaveFileName(self, "Save Python File", str(self.saveDir / "untitled.py"), "Python Files (*.py);;All Files (*)")
         if not path:
             return False
 
@@ -231,7 +246,7 @@ class MainWindow(QMainWindow):
             self.ui.consoleOutput.appendPlainText(f"--- Done ---")
 
     def open_lturtle_window(self):
-        self.lturtle_window: LTurtleWindow = LTurtleWindow(self)
+        self.lturtle_window: LTurtleWindow = LTurtleWindow(self, self.saveDir)
         self.lturtle_window.show()
         self.hide()
 

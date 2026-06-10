@@ -189,8 +189,6 @@ class SVGTurtle:
     """
 
     def __init__(self, width=400, height=400, filename="output.svg", bgcolor="lightblue"):
-        self.width = width
-        self.height = height
         self.filename = filename
         self.turtle = Turtle()
 

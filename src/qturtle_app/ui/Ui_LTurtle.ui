@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>678</width>
-    <height>562</height>
+    <width>700</width>
+    <height>577</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -109,229 +109,281 @@ padding: 3 30 3 30;
      </layout>
     </item>
     <item>
-     <widget class="QSplitter" name="splitter">
+     <widget class="QSplitter" name="mainSplitter">
       <property name="orientation">
        <enum>Qt::Orientation::Vertical</enum>
       </property>
-      <property name="childrenCollapsible">
-       <bool>false</bool>
+      <property name="handleWidth">
+       <number>1</number>
       </property>
-      <widget class="QGroupBox" name="LSystemForm">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>3</verstretch>
-        </sizepolicy>
+      <widget class="QSplitter" name="topSplitter">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
-       <property name="styleSheet">
-        <string notr="true">font-size:11pt;</string>
+       <property name="handleWidth">
+        <number>1</number>
        </property>
-       <property name="title">
-        <string>Lindenmayer System</string>
+       <property name="childrenCollapsible">
+        <bool>false</bool>
        </property>
-       <layout class="QFormLayout" name="formLayout">
-        <item row="1" column="1">
-         <widget class="QSpinBox" name="winkel">
-          <property name="minimum">
-           <number>0</number>
+       <widget class="QWidget" name="widget" native="true">
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QGroupBox" name="LSystemForm">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>3</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font-size:11pt;</string>
+           </property>
+           <property name="title">
+            <string>Lindenmayer System</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+           <layout class="QFormLayout" name="formLayout">
+            <item row="0" column="0" colspan="2">
+             <layout class="QGridLayout" name="gridLayout">
+              <property name="leftMargin">
+               <number>9</number>
+              </property>
+              <property name="topMargin">
+               <number>9</number>
+              </property>
+              <property name="rightMargin">
+               <number>9</number>
+              </property>
+              <property name="bottomMargin">
+               <number>9</number>
+              </property>
+              <item row="8" column="0">
+               <widget class="QLabel" name="label_rule_d">
+                <property name="text">
+                 <string>Rule D:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QLineEdit" name="ruleA">
+                <property name="text">
+                 <string>X &gt; X+YF+</string>
+                </property>
+                <property name="placeholderText">
+                 <string>e.g., A</string>
+                </property>
+               </widget>
+              </item>
+              <item row="10" column="1">
+               <widget class="QLineEdit" name="ruleF">
+                <property name="placeholderText">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="axiom">
+                <property name="text">
+                 <string>X</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="1">
+               <widget class="QLineEdit" name="ruleE">
+                <property name="placeholderText">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <widget class="QLabel" name="label_rule_c">
+                <property name="text">
+                 <string>Rule C:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QSpinBox" name="iterationen">
+                <property name="minimum">
+                 <number>2</number>
+                </property>
+                <property name="maximum">
+                 <number>10</number>
+                </property>
+                <property name="value">
+                 <number>2</number>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QLineEdit" name="ruleB">
+                <property name="text">
+                 <string>Y &gt; -FX-Y</string>
+                </property>
+                <property name="placeholderText">
+                 <string>e.g., B</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="0">
+               <widget class="QLabel" name="label_rule_e">
+                <property name="text">
+                 <string>Rule E:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>Axiom:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_length">
+                <property name="text">
+                 <string>Linienlänge:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_rule_a">
+                <property name="text">
+                 <string>Rule A:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_iterations">
+                <property name="text">
+                 <string>Iterationen:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QSpinBox" name="winkel">
+                <property name="minimum">
+                 <number>0</number>
+                </property>
+                <property name="maximum">
+                 <number>359</number>
+                </property>
+                <property name="value">
+                 <number>90</number>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_angle">
+                <property name="text">
+                 <string>Winkel (°):</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="1">
+               <widget class="QLineEdit" name="ruleC">
+                <property name="placeholderText">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="10" column="0">
+               <widget class="QLabel" name="label_rule_f">
+                <property name="text">
+                 <string>Rule F:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0" colspan="2">
+               <widget class="QLabel" name="label_rules_header">
+                <property name="text">
+                 <string>Regeln: muss &gt; beinhalten</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="1">
+               <widget class="QLineEdit" name="ruleD">
+                <property name="placeholderText">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QLabel" name="label_rule_b">
+                <property name="text">
+                 <string>Rule B:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QSpinBox" name="laenge">
+                <property name="maximum">
+                 <number>500</number>
+                </property>
+                <property name="value">
+                 <number>100</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="widget21" native="true">
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <property name="topMargin">
+          <number>18</number>
+         </property>
+         <item>
+          <widget class="QPlainTextEdit" name="rightTextArea">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:#ffffff;</string>
+           </property>
+           <property name="plainText">
+            <string>fsgdgdgf</string>
+           </property>
+           <property name="placeholderText">
+            <string>Right panel...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="widget22" native="true">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QPlainTextEdit" name="consoleOutput">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
           </property>
-          <property name="maximum">
-           <number>359</number>
-          </property>
-          <property name="value">
-           <number>90</number>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_iterations">
-          <property name="text">
-           <string>Iterationen:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QSpinBox" name="iterationen">
-          <property name="minimum">
-           <number>2</number>
-          </property>
-          <property name="maximum">
-           <number>10</number>
-          </property>
-          <property name="value">
-           <number>2</number>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_length">
-          <property name="text">
-           <string>Linienlänge:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QDoubleSpinBox" name="laenge">
-          <property name="decimals">
-           <number>0</number>
-          </property>
-          <property name="minimum">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>1000.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>10.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0" colspan="2">
-         <widget class="QLabel" name="label_rules_header">
-          <property name="text">
-           <string>Regeln: muss &gt; beinhalten</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_rule_a">
-          <property name="text">
-           <string>Rule A:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QLineEdit" name="ruleA">
-          <property name="text">
-           <string>X &gt; X+YF+</string>
-          </property>
-          <property name="placeholderText">
-           <string>e.g., A</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_rule_b">
-          <property name="text">
-           <string>Rule B:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="1">
-         <widget class="QLineEdit" name="ruleB">
-          <property name="text">
-           <string>Y &gt; -FX-Y</string>
-          </property>
-          <property name="placeholderText">
-           <string>e.g., B</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="label_rule_c">
-          <property name="text">
-           <string>Rule C:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QLineEdit" name="ruleC">
-          <property name="placeholderText">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="0">
-         <widget class="QLabel" name="label_rule_d">
-          <property name="text">
-           <string>Rule D:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="1">
-         <widget class="QLineEdit" name="ruleD">
-          <property name="placeholderText">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0">
-         <widget class="QLabel" name="label_rule_e">
-          <property name="text">
-           <string>Rule E:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="1">
-         <widget class="QLineEdit" name="ruleE">
-          <property name="placeholderText">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0">
-         <widget class="QLabel" name="label_rule_f">
-          <property name="text">
-           <string>Rule F:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="1">
-         <widget class="QLineEdit" name="ruleF">
-          <property name="placeholderText">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="0" colspan="2">
-         <widget class="QLabel" name="label_legend">
           <property name="styleSheet">
-           <string>color: gray;</string>
+           <string notr="true">background:#ffffff;</string>
           </property>
-          <property name="text">
-           <string>Legende:  + = Winkel°   - = -Winkel°   [ = push   ] = pop   F = forward</string>
-          </property>
-          <property name="wordWrap">
+          <property name="readOnly">
            <bool>true</bool>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_angle">
-          <property name="text">
-           <string>Winkel (°):</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Axiom:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="axiom">
-          <property name="text">
-           <string>X</string>
+          <property name="placeholderText">
+           <string>Console output...</string>
           </property>
          </widget>
         </item>
        </layout>
-      </widget>
-      <widget class="QPlainTextEdit" name="consoleOutput">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>1</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="placeholderText">
-        <string>Console output...</string>
-       </property>
       </widget>
      </widget>
     </item>
@@ -342,7 +394,7 @@ padding: 3 30 3 30;
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>678</width>
+     <width>700</width>
      <height>33</height>
     </rect>
    </property>
