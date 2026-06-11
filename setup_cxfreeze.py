@@ -5,14 +5,6 @@ import sys
 from pathlib import Path
 from cx_Freeze import setup, Executable
 
-# ._pth file next to the bundled python.exe:
-#   lib           → cx_Freeze package directory (turtle, tkinter, qturtle_app, …)
-#   import site   → re-enables PYTHONPATH processing (._pth disables it by default)
-_ver = f"{sys.version_info.major}{sys.version_info.minor}"
-_pth_name = f"python{_ver}._pth"
-_pth_path = Path(_pth_name)
-_pth_path.write_text("lib\nimport site\n", encoding="utf-8")
-
 build_exe_options = {
     "packages": [
         "PySide6.QtCore",
@@ -32,7 +24,6 @@ build_exe_options = {
         ("src/qturtle_app/ui/Ui_MainWindow.ui", "lib/qturtle_app/ui/Ui_MainWindow.ui"),
         # Bundle python.exe so runner.py can launch scripts as subprocesses
         (sys.executable, "python.exe"),
-        (str(_pth_path), _pth_name),
     ],
     "excludes": [
         "PyQt6",
@@ -71,13 +62,10 @@ executables = [
     )
 ]
 
-try:
-    setup(
-        name="QTurtle",
-        version="1.0.0",
-        description="Python IDE for turtle graphics scripts",
-        options={"build_exe": build_exe_options},
-        executables=executables,
-    )
-finally:
-    _pth_path.unlink(missing_ok=True)
+setup(
+    name="QTurtle",
+    version="1.0.0",
+    description="Python IDE for turtle graphics scripts",
+    options={"build_exe": build_exe_options},
+    executables=executables,
+)
