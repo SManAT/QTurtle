@@ -350,3 +350,18 @@ class SVGTurtle:
     def getPosviaAngle(self, radius, angle):
         """Get position via angle"""
         return self.svg_turtle.getPosviaAngle(radius, angle)
+
+    def drawLSystem(self, lstr: str, L, angle, iterations):
+        """Draw a Lindenmayer String"""
+        L = L // iterations
+        for char in lstr:
+            if char == "F":
+                self.forward(L)
+            elif char == "+":
+                self.left(angle)
+            elif char == "-":
+                self.right(angle)
+            elif char == "f":
+                self.penup()
+                self.forward(L)
+                self.pendown()

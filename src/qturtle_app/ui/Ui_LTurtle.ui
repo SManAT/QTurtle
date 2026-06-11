@@ -211,10 +211,10 @@ padding: 3 30 3 30;
                  <number>2</number>
                 </property>
                 <property name="maximum">
-                 <number>10</number>
+                 <number>100</number>
                 </property>
                 <property name="value">
-                 <number>2</number>
+                 <number>20</number>
                 </property>
                </widget>
               </item>
@@ -341,7 +341,7 @@ padding: 3 30 3 30;
           <number>18</number>
          </property>
          <item>
-          <widget class="QPlainTextEdit" name="rightTextArea">
+          <widget class="QPlainTextEdit" name="codeEditor">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -349,13 +349,13 @@ padding: 3 30 3 30;
             </sizepolicy>
            </property>
            <property name="styleSheet">
-            <string notr="true">background:#ffffff;</string>
+            <string notr="true">background:#ffffff; font-size:12pt;</string>
            </property>
            <property name="plainText">
-            <string>fsgdgdgf</string>
+            <string/>
            </property>
            <property name="placeholderText">
-            <string>Right panel...</string>
+            <string>Final code shows up here ...</string>
            </property>
           </widget>
          </item>

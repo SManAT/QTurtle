@@ -7,7 +7,7 @@ from PySide6.QtCore import QObject, QProcess, QProcessEnvironment, Signal
 
 
 class ScriptRunner(QObject):
-    output_received = Signal(str)
+    output_received: Signal = Signal(str)
     error_received = Signal(str)
     finished_with_code = Signal(int)
 

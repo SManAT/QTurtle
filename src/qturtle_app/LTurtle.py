@@ -4,7 +4,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import Qt
+from PySide6 import QtCore
+from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QColor, QFont, QIcon, QPixmap, QScreen, QTextCharFormat
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMessageBox
 from qturtle_app.L_system_class import LSystem
@@ -22,6 +23,22 @@ if sys.platform == "win32":
         pass
 
 
+class LSystemWorker(QThread):
+    finished = Signal(str)
+    error = Signal(str)
+
+    def __init__(self, lsystem: LSystem):
+        super().__init__()
+        self.lsystem = lsystem
+
+    def run(self):
+        try:
+            result = self.lsystem.getFinalString()
+            self.finished.emit(result)
+        except Exception as e:
+            self.error.emit(str(e))
+
+
 class LTurtleWindow(QMainWindow):
 
     def __init__(self, main_window: QMainWindow, saveDir: Path):
@@ -30,6 +47,8 @@ class LTurtleWindow(QMainWindow):
         self.rootDir = Path(__file__).parent
         self.current_file = None
         self.saveDir = saveDir
+        self.lsystem_worker = None
+        self.loader_spinner_index = 0
 
         # Setup UI
         self.ui = Ui_LTurtleWindow()
@@ -38,8 +57,18 @@ class LTurtleWindow(QMainWindow):
         self.ui.mainSplitter.setSizes([450, 150])
         self.load_stylesheet("styles.css")
 
+        # Create loader label
+        self.loader_label = QLabel("⠋ Generating L-System...")
+        self.loader_label.setStyleSheet("color: #6366f1; font-weight: bold; margin-left:10px;")
+        self.loader_label.hide()
+        self.ui.horizontalLayout.insertWidget(1, self.loader_label)
+
         # Configure console output
         self._setup_console()
+
+        # Setup loader animation timer
+        self.loader_timer = QtCore.QTimer()
+        self.loader_timer.timeout.connect(self._update_loader_animation)
 
         # Setup script runner
         self.runner = ScriptRunner(self)
@@ -71,6 +100,9 @@ class LTurtleWindow(QMainWindow):
         screen_w = screen.availableGeometry().width()
         self.setGeometry(0, 0, int(screen_w * 0.75), int(screen_h * 0.75))
         self.center()
+
+        # show legend in console
+        self.ui.consoleOutput.appendPlainText(LSystem.legend())
 
         self.show()
 
@@ -116,12 +148,27 @@ class LTurtleWindow(QMainWindow):
 
         for char, widget in [("A", self.ui.ruleA), ("B", self.ui.ruleB), ("C", self.ui.ruleC), ("D", self.ui.ruleD), ("E", self.ui.ruleE), ("F", self.ui.ruleF)]:
             rule = widget.text()
-            # split like F>F+ on >, :
             res = re.split(r"[>:]+", rule)
             if rule:
                 rules[res[0].strip()] = res[1].strip()
 
-        lsys = LSystem(angle, iterations, length, axiom, rules)
+        lsys = LSystem(angle, iterations, axiom, rules)
+
+        # Show loader and start worker thread
+        self.ui.btnRun.setEnabled(False)
+        self.loader_label.show()
+        self.loader_spinner_index = 0
+        self.loader_timer.start(100)
+
+        self.lsystem_worker = LSystemWorker(lsys)
+        self.lsystem_worker.finished.connect(lambda lstr: self._on_lsystem_generated(lstr, length, angle, iterations))
+        self.lsystem_worker.error.connect(self._on_lsystem_error)
+        self.lsystem_worker.start()
+
+    def _on_lsystem_generated(self, lstr, length, angle, iterations):
+        self.loader_timer.stop()
+        self.loader_label.hide()
+        self.ui.btnRun.setEnabled(True)
 
         code = f"""\
 from qturtle_app.svg_turtle_class import SVGTurtle
@@ -130,17 +177,19 @@ import math
 
 t = SVGTurtle(width=800, height=800, filename="lsystem.svg", bgcolor="white")
 t.speed(0)
-
-axiom = "{axiom}"
-rules = {rules}
-angle = {angle}
-length = {length}
-
-
+L_str = "{lstr}"
+t.drawLSystem(L_str, {length}, {angle}, {iterations})
 
 t.save_svg()
 """
-        return code
+        self.ui.codeEditor.setPlainText(code)
+        self.runner.run(code)
+
+    def _on_lsystem_error(self, error_msg):
+        self.loader_timer.stop()
+        self.loader_label.hide()
+        self.ui.btnRun.setEnabled(True)
+        QMessageBox.critical(self, "Error", f"Failed to generate L-System: {error_msg}")
 
     def _on_modification_changed(self, changed):
         self._update_title()
@@ -211,11 +260,15 @@ t.save_svg()
     def _maybe_save(self):
         return True
 
+    def _update_loader_animation(self):
+        spinners = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+        self.loader_spinner_index = (self.loader_spinner_index + 1) % len(spinners)
+        self.loader_label.setText(f"{spinners[self.loader_spinner_index]} Generating L-System...")
+
     def run_script(self):
         self.ui.consoleOutput.clear()
         self.ui.consoleOutput.appendPlainText("--- Running L-System ---\n")
-        code = self._generate_lsystem_code()
-        self.runner.run(code)
+        self._generate_lsystem_code()
 
     def stop_script(self):
         self.runner.stop()

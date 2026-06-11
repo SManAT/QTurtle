@@ -2,7 +2,7 @@ import sys
 import os
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QFont, QIcon, QPixmap, QScreen, QTextCharFormat
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMessageBox
 from qturtle_app.ui.Ui_MainWindow import Ui_MainWindow
