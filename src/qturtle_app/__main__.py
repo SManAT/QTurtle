@@ -5,6 +5,7 @@ from pathlib import Path
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QFont, QIcon, QPixmap, QScreen, QTextCharFormat
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMessageBox
+from qturtle_app.lib.css_class import cssTool
 from qturtle_app.ui.Ui_MainWindow import Ui_MainWindow
 from qturtle_app.LTurtle import LTurtleWindow
 
@@ -87,6 +88,14 @@ class MainWindow(QMainWindow):
         except Exception:
             pass
 
+        self.setUpScreen()
+
+        self.show()
+
+        # Debug
+        self.open_lturtle_window()
+
+    def setUpScreen(self):
         # center on screen
         screen = QApplication.primaryScreen()
         screen_h = screen.availableGeometry().height()
@@ -94,10 +103,19 @@ class MainWindow(QMainWindow):
         self.setGeometry(0, 0, int(screen_w * 0.75), int(screen_h * 0.75))
         self.center()
 
-        self.show()
+        # Set fontsize responsive
+        styles_to_update = {}
+        if screen_h < 1000:
+            styles_to_update = {"font-size": "10pt"}
 
-        # Debug
-        self.open_lturtle_window()
+        cTool = cssTool()
+        css = self.ui.consoleOutput.styleSheet()
+        css = cTool.update_css_styles(css, styles_to_update)
+        self.ui.consoleOutput.setStyleSheet(css)
+
+        css = self.ui.codeEditor.styleSheet()
+        css = cTool.update_css_styles(css, styles_to_update)
+        self.ui.codeEditor.setStyleSheet(css)
 
     def center(self):
         center = QScreen.availableGeometry(QApplication.primaryScreen()).center()

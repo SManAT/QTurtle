@@ -122,10 +122,30 @@ _qturtle_t.Turtle.back = _qturtle_track_backward
             else:
                 exe_dir = Path(sys.executable).parent
                 extra.insert(0, str(exe_dir))
-                # cx_Freeze stores packages in lib/ subdirectory
+                # cx_Freeze stores packages in lib/ and lib/library.zip.
+                # Both paths are needed: the directory for .pyd extensions,
+                # the zip for pure-Python modules (turtle, tkinter, …).
                 lib_dir = exe_dir / "lib"
                 if lib_dir.exists():
                     extra.insert(0, str(lib_dir))
+                    lib_zip = lib_dir / "library.zip"
+                    if lib_zip.exists():
+                        extra.insert(0, str(lib_zip))
+                # Add build root to PATH so Windows DLL loader finds tcl/tk DLLs
+                # when _tkinter.pyd (loaded from lib/) tries to import them.
+                existing_path = env.value("PATH", "")
+                env.insert("PATH", f"{str(exe_dir)};{existing_path}")
+                # Set Tcl/Tk library paths so tkinter can initialize in the subprocess.
+                # cx_Freeze copies DLLs but not data files; we place those under tcl/.
+                tcl_base = exe_dir / "tcl"
+                for d in sorted(tcl_base.glob("tcl*")):
+                    if d.is_dir() and (d / "init.tcl").exists():
+                        env.insert("TCL_LIBRARY", str(d))
+                        break
+                for d in sorted(tcl_base.glob("tk*")):
+                    if d.is_dir() and (d / "tk.tcl").exists():
+                        env.insert("TK_LIBRARY", str(d))
+                        break
         pythonpath = ";".join(filter(None, extra + [existing]))
         env.insert("PYTHONPATH", pythonpath)
         self._process.setProcessEnvironment(env)
@@ -161,8 +181,12 @@ _qturtle_t.Turtle.back = _qturtle_track_backward
             if candidate.exists():
                 return str(candidate)
 
-        # cx_Freeze and similar: python.exe placed next to the app executable
+        # cx_Freeze: python.exe in runtime/ subdirectory (has its own ._pth file)
         if getattr(sys, "frozen", False):
+            candidate = exe.parent / "runtime" / "python.exe"
+            if candidate.exists():
+                return str(candidate)
+            # Fallback: python.exe placed directly next to the app
             candidate = exe.parent / "python.exe"
             if candidate.exists():
                 return str(candidate)

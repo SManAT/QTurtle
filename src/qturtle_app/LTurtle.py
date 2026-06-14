@@ -8,7 +8,9 @@ from PySide6 import QtCore
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QColor, QFont, QIcon, QPixmap, QScreen, QTextCharFormat
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMessageBox
-from qturtle_app.L_system_class import LSystem
+from qturtle_app.lib.L_system_class import LSystem
+
+from qturtle_app.lib.css_class import cssTool
 from qturtle_app.ui.Ui_LTurtle import Ui_LTurtleWindow
 
 from qturtle_app.runner import ScriptRunner
@@ -94,6 +96,14 @@ class LTurtleWindow(QMainWindow):
         except Exception:
             pass
 
+        self.setUpScreen()
+
+        # show legend in console
+        self.ui.consoleOutput.appendPlainText(LSystem.legend())
+
+        self.show()
+
+    def setUpScreen(self):
         # center on screen
         screen = QApplication.primaryScreen()
         screen_h = screen.availableGeometry().height()
@@ -101,10 +111,23 @@ class LTurtleWindow(QMainWindow):
         self.setGeometry(0, 0, int(screen_w * 0.75), int(screen_h * 0.75))
         self.center()
 
-        # show legend in console
-        self.ui.consoleOutput.appendPlainText(LSystem.legend())
+        # Set fontsize responsive
+        styles_to_update = {}
+        if screen_h < 1000:
+            styles_to_update = {"font-size": "10pt"}
 
-        self.show()
+        cTool = cssTool()
+        css = self.ui.consoleOutput.styleSheet()
+        css = cTool.update_css_styles(css, styles_to_update)
+        self.ui.consoleOutput.setStyleSheet(css)
+
+        css = self.ui.codeEditor.styleSheet()
+        css = cTool.update_css_styles(css, styles_to_update)
+        self.ui.codeEditor.setStyleSheet(css)
+
+        css = self.ui.LSystemForm.styleSheet()
+        css = cTool.update_css_styles(css, styles_to_update)
+        self.ui.LSystemForm.setStyleSheet(css)
 
     def center(self):
         center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
@@ -172,7 +195,7 @@ class LTurtleWindow(QMainWindow):
 
         code = f"""\
 from qturtle_app.svg_turtle_class import SVGTurtle
-from qturtle_app.L_system_class import LSystem
+from qturtle_app.lib.L_system_class import LSystem
 import math
 
 t = SVGTurtle(width=800, height=800, filename="lsystem.svg", bgcolor="white")

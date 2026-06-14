@@ -214,7 +214,7 @@ padding: 3 30 3 30;
                  <number>100</number>
                 </property>
                 <property name="value">
-                 <number>20</number>
+                 <number>5</number>
                 </property>
                </widget>
               </item>
@@ -372,11 +372,17 @@ padding: 3 30 3 30;
             <verstretch>1</verstretch>
            </sizepolicy>
           </property>
+          <property name="acceptDrops">
+           <bool>false</bool>
+          </property>
           <property name="styleSheet">
            <string notr="true">background:#ffffff;</string>
           </property>
+          <property name="undoRedoEnabled">
+           <bool>false</bool>
+          </property>
           <property name="readOnly">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="placeholderText">
            <string>Console output...</string>

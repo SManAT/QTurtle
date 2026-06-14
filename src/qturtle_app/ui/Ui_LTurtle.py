@@ -165,7 +165,7 @@ class Ui_LTurtleWindow(object):
         self.iterationen.setObjectName(u"iterationen")
         self.iterationen.setMinimum(2)
         self.iterationen.setMaximum(100)
-        self.iterationen.setValue(20)
+        self.iterationen.setValue(5)
 
         self.gridLayout.addWidget(self.iterationen, 2, 1, 1, 1)
 
@@ -280,8 +280,10 @@ class Ui_LTurtleWindow(object):
         sizePolicy2.setVerticalStretch(1)
         sizePolicy2.setHeightForWidth(self.consoleOutput.sizePolicy().hasHeightForWidth())
         self.consoleOutput.setSizePolicy(sizePolicy2)
+        self.consoleOutput.setAcceptDrops(False)
         self.consoleOutput.setStyleSheet(u"background:#ffffff;")
-        self.consoleOutput.setReadOnly(True)
+        self.consoleOutput.setUndoRedoEnabled(False)
+        self.consoleOutput.setReadOnly(False)
 
         self.horizontalLayout_2.addWidget(self.consoleOutput)
 

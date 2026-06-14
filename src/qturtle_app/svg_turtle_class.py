@@ -24,7 +24,15 @@ t.save_svg()
 
 import math
 import os
-from turtle import Turtle
+
+try:
+    from turtle import Turtle as _BaseTurtle
+    _TURTLE_AVAILABLE = True
+except Exception as _turtle_import_error:
+    _BaseTurtle = None  # type: ignore[assignment,misc]
+    _TURTLE_AVAILABLE = False
+    import sys as _sys
+    print(f"Warning: turtle animation unavailable ({_turtle_import_error})", file=_sys.stderr)
 
 from svg_turtle import SvgTurtle
 
@@ -190,7 +198,12 @@ class SVGTurtle:
 
     def __init__(self, width=400, height=400, filename="output.svg", bgcolor="lightblue"):
         self.filename = filename
-        self.turtle = Turtle()
+        try:
+            self.turtle = _BaseTurtle() if _TURTLE_AVAILABLE else None
+        except Exception as e:
+            import sys as _sys
+            print(f"Warning: could not create turtle window ({e})", file=_sys.stderr)
+            self.turtle = None
 
         # Set up SVG_Turtle for export first (creates svg directory and sets final path)
         self.svg_turtle = SVG_Turtle_Output({"filename": filename, "size": (width, height)})
