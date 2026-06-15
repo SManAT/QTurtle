@@ -2,9 +2,11 @@
 """cx_Freeze build configuration for QTurtle"""
 
 import atexit
+import shutil
 import sys
 from pathlib import Path
 from cx_Freeze import setup, Executable
+from cx_Freeze.command.build_exe import build_exe as _build_exe
 
 # Put the subprocess python.exe in runtime/ so its ._pth file does not land
 # in the build root alongside QTurtle.exe.  If a python3XX._pth file sits
@@ -29,46 +31,42 @@ def _cleanup_pth():
         pass
 
 
-# Tcl/Tk version numbers — needed for both DLL names and data-file paths.
-import _tkinter
-
-_tcl_ver = _tkinter.TCL_VERSION  # e.g. "8.6" or "9.0"
-_tk_ver = _tkinter.TK_VERSION
-
-# python.exe needs its own DLLs in its directory to start.
-# Python 3.8+ ignores PATH when loading C-extension dependencies — it only
-# searches the app directory (runtime/) and the .pyd's own directory (lib/).
-# Tcl/Tk DLLs must therefore be in runtime/ so that _tkinter.pyd can load them.
+# python.exe needs its own python3XX.dll next to it to start.
 _python_dir = Path(sys.executable).parent
 _runtime_includes: list = [
     (sys.executable, "runtime/python.exe"),
     (str(_pth_path), f"runtime/{_pth_name}"),
 ]
-for _dll_name in (
-    f"python{ver}.dll",
-    f"tcl{_tcl_ver.replace('.', '')}.dll",
-    f"tk{_tk_ver.replace('.', '')}.dll",
-):
-    _dll = _python_dir / _dll_name
-    if _dll.exists():
-        _runtime_includes.append((str(_dll), f"runtime/{_dll_name}"))
+_python_dll = _python_dir / f"python{ver}.dll"
+if _python_dll.exists():
+    _runtime_includes.append((str(_python_dll), f"runtime/python{ver}.dll"))
 
-# Explicitly copy Tcl/Tk library data files (init.tcl, tk.tcl, etc.) to
-# tcl/ in the build output.  cx_Freeze copies the DLLs but often omits the
-# data files, so the subprocess python.exe can't initialize Tcl without them.
-def _find_tcltk_src():
-    for base in (Path(sys.prefix), Path(getattr(sys, "base_prefix", sys.prefix))):
-        tcl = base / "tcl" / f"tcl{_tcl_ver}"
-        if tcl.exists():
-            return tcl, base / "tcl" / f"tk{_tk_ver}"
-    return None, None
 
-_tcl_src, _tk_src = _find_tcltk_src()
-_tcltk_includes: list = []
-if _tcl_src and _tcl_src.exists():
-    _tcltk_includes.append((str(_tcl_src), f"tcl/tcl{_tcl_ver}"))
-if _tk_src and _tk_src.exists():
-    _tcltk_includes.append((str(_tk_src), f"tcl/tk{_tk_ver}"))
+class BuildExe(_build_exe):
+    """Custom build_exe that mirrors the Tcl/Tk data into runtime/.
+
+    cx_Freeze places the (version-matched) Tcl/Tk data files under
+    <build>/share/tcl8.6 and share/tk8.6 for the main executable.  Our
+    subprocess interpreter lives in runtime/python.exe, and Tcl's default
+    search looks for init.tcl at runtime/share/tcl8.6 (relative to the exe)
+    — TCL_LIBRARY is not honoured by this Tcl build.  Copying share/ into
+    runtime/share/ puts the data exactly where Tcl looks, so tkinter/turtle
+    work with no environment variables.
+    """
+
+    def run(self):
+        super().run()
+        out = Path(self.build_exe)
+        src = out / "share"
+        dst = out / "runtime" / "share"
+        if src.is_dir():
+            if dst.exists():
+                shutil.rmtree(dst)
+            shutil.copytree(src, dst)
+            print(f"  Copied Tcl/Tk data -> {dst}")
+        else:
+            print(f"  WARNING: {src} not found; tkinter/turtle may not work in subprocesses")
+
 
 build_exe_options = {
     "packages": [
@@ -89,7 +87,6 @@ build_exe_options = {
         ("src/qturtle_app/css", "lib/qturtle_app/css"),
         ("src/qturtle_app/ui/Ui_MainWindow.ui", "lib/qturtle_app/ui/Ui_MainWindow.ui"),
         *_runtime_includes,
-        *_tcltk_includes,
     ],
     "excludes": [
         "PyQt6",
@@ -136,4 +133,5 @@ setup(
     description="Python IDE for turtle graphics scripts",
     options={"build_exe": build_exe_options},
     executables=executables,
+    cmdclass={"build_exe": BuildExe},
 )

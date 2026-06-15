@@ -135,17 +135,8 @@ _qturtle_t.Turtle.back = _qturtle_track_backward
                 # when _tkinter.pyd (loaded from lib/) tries to import them.
                 existing_path = env.value("PATH", "")
                 env.insert("PATH", f"{str(exe_dir)};{existing_path}")
-                # Set Tcl/Tk library paths so tkinter can initialize in the subprocess.
-                # cx_Freeze copies DLLs but not data files; we place those under tcl/.
-                tcl_base = exe_dir / "tcl"
-                for d in sorted(tcl_base.glob("tcl*")):
-                    if d.is_dir() and (d / "init.tcl").exists():
-                        env.insert("TCL_LIBRARY", str(d))
-                        break
-                for d in sorted(tcl_base.glob("tk*")):
-                    if d.is_dir() and (d / "tk.tcl").exists():
-                        env.insert("TK_LIBRARY", str(d))
-                        break
+                # Note: Tcl finds its data via runtime/share/tcl8.6 (its default
+                # search path relative to runtime/python.exe); no TCL_LIBRARY needed.
         pythonpath = ";".join(filter(None, extra + [existing]))
         env.insert("PYTHONPATH", pythonpath)
         self._process.setProcessEnvironment(env)
