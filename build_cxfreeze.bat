@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set "OUTPUT_DIR=dist\QTurtleCxFreeze"
+set "OUTPUT_DIR=dist\QTurtle"
 set "CXFREEZE_TEMP=build\cxfreeze_temp"
 
 echo ================================================
