@@ -1,4 +1,4 @@
 # QTurtle
-a Python Turtle Iplementation
+A Python Turtle Implementation, also provides a Lindenmayer Turtle Implementation.
 
-**Remember**: Nuitka **cant** bundle python.exe, what is needed in subprocesses
+Builds are done with cx_freeze.
