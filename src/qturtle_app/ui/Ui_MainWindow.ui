@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>714</width>
-    <height>427</height>
+    <width>711</width>
+    <height>492</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -116,10 +116,16 @@ font-size: 12px;</string>
       </widget>
       <widget class="QPlainTextEdit" name="consoleOutput">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
          <verstretch>1</verstretch>
         </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>150</height>
+        </size>
        </property>
        <property name="readOnly">
         <bool>true</bool>
@@ -137,7 +143,7 @@ font-size: 12px;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>714</width>
+     <width>711</width>
      <height>33</height>
     </rect>
    </property>
@@ -152,16 +158,6 @@ font-size: 12px;</string>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>&amp;Bearbeiten</string>
-    </property>
-    <addaction name="actionCut"/>
-    <addaction name="actionCopy"/>
-    <addaction name="actionPaste"/>
-    <addaction name="separator"/>
-    <addaction name="actionSelect_All"/>
-   </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
      <string>&amp;Run</string>
@@ -170,7 +166,6 @@ font-size: 12px;</string>
     <addaction name="actionStop"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
    <addaction name="menuRun"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -218,32 +213,20 @@ font-size: 12px;</string>
    <property name="text">
     <string>Ausschneiden</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+X</string>
-   </property>
   </action>
   <action name="actionCopy">
    <property name="text">
     <string>Kopieren</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
    </property>
   </action>
   <action name="actionPaste">
    <property name="text">
     <string>Einfügen</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+V</string>
-   </property>
   </action>
   <action name="actionSelect_All">
    <property name="text">
     <string>Select &amp;All</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+A</string>
    </property>
   </action>
   <action name="actionRun">

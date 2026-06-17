@@ -1,0 +1,12 @@
+{
+  "angle": 90,
+  "iterations": 5,
+  "length": 100,
+  "axiom": "X",
+  "ruleA": "X > X+YF+",
+  "ruleB": "Y > -FX-Y",
+  "ruleC": "",
+  "ruleD": "",
+  "ruleE": "",
+  "filename": "kkk.svg"
+}

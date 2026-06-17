@@ -52,7 +52,7 @@ QPlainTextEdit#consoleOutput {
     background-color: #0C0C0C;
     color: #CCCCCC;
     font-family: "Consolas", "Courier New", monospace;
-    font-size: 11px;
+    /* font size is driven by ResponsiveMainWindow (setFont), so it can scale */
     border: none;
     border-top: 1px solid #3C3C3C;
 }

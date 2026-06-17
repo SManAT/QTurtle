@@ -3,9 +3,9 @@ import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QColor, QFont, QIcon, QPixmap, QScreen, QTextCharFormat
-from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMessageBox
-from qturtle_app.lib.css_class import cssTool
+from PySide6.QtGui import QColor, QFont, QPixmap, QTextCharFormat
+from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMessageBox
+from qturtle_app.lib.responsive_window import ResponsiveMainWindow
 from qturtle_app.ui.Ui_MainWindow import Ui_MainWindow
 from qturtle_app.LTurtle import LTurtleWindow
 
@@ -39,7 +39,7 @@ t.save_svg()
 """
 
 
-class MainWindow(QMainWindow):
+class MainWindow(ResponsiveMainWindow):
 
     def __init__(self):
         super().__init__()
@@ -80,48 +80,19 @@ class MainWindow(QMainWindow):
         self.ui.statusbar.addPermanentWidget(copyright_label)
 
         # Load window icon for taskbar
-        try:
-            icon_path = self.rootDir.parent / "assets" / "app.ico"
-            if icon_path.exists():
-                appIcon = QIcon(str(icon_path))
-                self.setWindowIcon(appIcon)
-        except Exception:
-            pass
+        self.apply_window_icon()
 
         self.setUpScreen()
 
         self.show()
 
-        # Debug
-        self.open_lturtle_window()
+    def responsive_font_widgets(self):
+        # Console scales with the window; the editor keeps its own Ctrl+/- zoom.
+        return (self.ui.consoleOutput,)
 
-    def setUpScreen(self):
-        # center on screen
-        screen = QApplication.primaryScreen()
-        screen_h = screen.availableGeometry().height()
-        screen_w = screen.availableGeometry().width()
-        self.setGeometry(0, 0, int(screen_w * 0.75), int(screen_h * 0.75))
-        self.center()
-
-        # Set fontsize responsive
-        styles_to_update = {}
-        if screen_h < 1000:
-            styles_to_update = {"font-size": "10pt"}
-
-        cTool = cssTool()
-        css = self.ui.consoleOutput.styleSheet()
-        css = cTool.update_css_styles(css, styles_to_update)
-        self.ui.consoleOutput.setStyleSheet(css)
-
-        css = self.ui.codeEditor.styleSheet()
-        css = cTool.update_css_styles(css, styles_to_update)
-        self.ui.codeEditor.setStyleSheet(css)
-
-    def center(self):
-        center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
-        geo = self.frameGeometry()
-        geo.moveCenter(center)
-        self.move(geo.topLeft())
+    def initial_font_widgets(self):
+        # Give the editor a screen-appropriate starting size at launch only.
+        return (self.ui.codeEditor, self.ui.consoleOutput)
 
     def _setup_console(self):
         self.ui.consoleOutput.setReadOnly(True)
@@ -273,15 +244,6 @@ class MainWindow(QMainWindow):
             event.accept()
         else:
             event.ignore()
-
-    def load_stylesheet(self, file_path):
-        css_path = Path.joinpath(self.rootDir, "css", file_path)
-        try:
-            with open(css_path, "r", encoding="utf-8") as file:
-                stylesheet = file.read()
-                self.setStyleSheet(stylesheet)
-        except FileNotFoundError:
-            print(f"CSS file '{css_path}' not found")
 
 
 def main():

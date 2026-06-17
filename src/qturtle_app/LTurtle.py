@@ -6,11 +6,11 @@ from typing import Any
 
 from PySide6 import QtCore
 from PySide6.QtCore import Qt, QThread, Signal
-from PySide6.QtGui import QColor, QFont, QIcon, QPixmap, QScreen, QTextCharFormat
+from PySide6.QtGui import QColor, QFont, QPixmap, QTextCharFormat
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMainWindow, QMessageBox
 from qturtle_app.lib.L_system_class import LSystem
 
-from qturtle_app.lib.css_class import cssTool
+from qturtle_app.lib.responsive_window import ResponsiveMainWindow
 from qturtle_app.ui.Ui_LTurtle import Ui_LTurtleWindow
 
 from qturtle_app.runner import ScriptRunner
@@ -23,6 +23,34 @@ if sys.platform == "win32":
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("QTurtle.App")
     except Exception:
         pass
+
+
+_UMLAUT_MAP = {
+    "ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss",
+    "Ä": "Ae", "Ö": "Oe", "Ü": "Ue",
+}
+
+
+def sanitize_filename(name: str, default: str = "lsystem") -> str:
+    """Return a safe ``*.svg`` filename for the given user input.
+
+    - transliterates German umlauts (ä→ae, ö→oe, ü→ue, ß→ss),
+    - replaces whitespace runs with a single underscore,
+    - drops any remaining non-ASCII / filesystem-unsafe characters,
+    - collapses repeated underscores and trims stray ``_``/``.`` at the ends,
+    - always returns a name ending in ``.svg`` (falling back to *default*).
+    """
+    name = name.strip()
+    for src, dst in _UMLAUT_MAP.items():
+        name = name.replace(src, dst)
+
+    # Work on the stem so the extension's dot survives the cleanup.
+    stem = re.sub(r"\.svg$", "", name, flags=re.IGNORECASE)
+    stem = re.sub(r"\s+", "_", stem)              # whitespace -> underscore
+    stem = re.sub(r"[^A-Za-z0-9_-]", "", stem)    # strip unsafe / non-ASCII
+    stem = re.sub(r"_+", "_", stem).strip("_.")   # tidy up
+
+    return f"{stem or default}.svg"
 
 
 class LSystemWorker(QThread):
@@ -41,7 +69,7 @@ class LSystemWorker(QThread):
             self.error.emit(str(e))
 
 
-class LTurtleWindow(QMainWindow):
+class LTurtleWindow(ResponsiveMainWindow):
 
     def __init__(self, main_window: QMainWindow, saveDir: Path):
         super().__init__()
@@ -88,13 +116,7 @@ class LTurtleWindow(QMainWindow):
         self.ui.statusbar.addPermanentWidget(copyright_label)
 
         # Load window icon for taskbar
-        try:
-            icon_path = self.rootDir.parent / "assets" / "app.ico"
-            if icon_path.exists():
-                appIcon = QIcon(str(icon_path))
-                self.setWindowIcon(appIcon)
-        except Exception:
-            pass
+        self.apply_window_icon()
 
         self.setUpScreen()
 
@@ -103,37 +125,13 @@ class LTurtleWindow(QMainWindow):
 
         self.show()
 
-    def setUpScreen(self):
-        # center on screen
-        screen = QApplication.primaryScreen()
-        screen_h = screen.availableGeometry().height()
-        screen_w = screen.availableGeometry().width()
-        self.setGeometry(0, 0, int(screen_w * 0.75), int(screen_h * 0.75))
-        self.center()
+    def responsive_font_widgets(self):
+        # Console scales with the window; the editor keeps its own Ctrl+/- zoom.
+        return (self.ui.consoleOutput,)
 
-        # Set fontsize responsive
-        styles_to_update = {}
-        if screen_h < 1000:
-            styles_to_update = {"font-size": "10pt"}
-
-        cTool = cssTool()
-        css = self.ui.consoleOutput.styleSheet()
-        css = cTool.update_css_styles(css, styles_to_update)
-        self.ui.consoleOutput.setStyleSheet(css)
-
-        css = self.ui.codeEditor.styleSheet()
-        css = cTool.update_css_styles(css, styles_to_update)
-        self.ui.codeEditor.setStyleSheet(css)
-
-        css = self.ui.LSystemForm.styleSheet()
-        css = cTool.update_css_styles(css, styles_to_update)
-        self.ui.LSystemForm.setStyleSheet(css)
-
-    def center(self):
-        center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
-        geo = self.frameGeometry()
-        geo.moveCenter(center)
-        self.move(geo.topLeft())
+    def initial_font_widgets(self):
+        # Give the editor a screen-appropriate starting size at launch only.
+        return (self.ui.codeEditor, self.ui.consoleOutput)
 
     def _setup_console(self):
         self.ui.consoleOutput.setReadOnly(True)
@@ -169,11 +167,14 @@ class LTurtleWindow(QMainWindow):
         axiom = self.ui.axiom.text()
         rules: dict[Any, Any] = {}
 
-        for char, widget in [("A", self.ui.ruleA), ("B", self.ui.ruleB), ("C", self.ui.ruleC), ("D", self.ui.ruleD), ("E", self.ui.ruleE), ("F", self.ui.ruleF)]:
+        for char, widget in [("A", self.ui.ruleA), ("B", self.ui.ruleB), ("C", self.ui.ruleC), ("D", self.ui.ruleD), ("E", self.ui.ruleE)]:
             rule = widget.text()
             res = re.split(r"[>:]+", rule)
             if rule:
                 rules[res[0].strip()] = res[1].strip()
+
+        filename = sanitize_filename(self.ui.filename.text())
+        self.ui.filename.setText(filename)  # reflect the sanitized name back
 
         lsys = LSystem(angle, iterations, axiom, rules)
 
@@ -184,11 +185,11 @@ class LTurtleWindow(QMainWindow):
         self.loader_timer.start(100)
 
         self.lsystem_worker = LSystemWorker(lsys)
-        self.lsystem_worker.finished.connect(lambda lstr: self._on_lsystem_generated(lstr, length, angle, iterations))
+        self.lsystem_worker.finished.connect(lambda lstr: self._on_lsystem_generated(lstr, length, angle, iterations, filename))
         self.lsystem_worker.error.connect(self._on_lsystem_error)
         self.lsystem_worker.start()
 
-    def _on_lsystem_generated(self, lstr, length, angle, iterations):
+    def _on_lsystem_generated(self, lstr, length, angle, iterations, filename):
         self.loader_timer.stop()
         self.loader_label.hide()
         self.ui.btnRun.setEnabled(True)
@@ -198,7 +199,7 @@ from qturtle_app.svg_turtle_class import SVGTurtle
 from qturtle_app.lib.L_system_class import LSystem
 import math
 
-t = SVGTurtle(width=800, height=800, filename="lsystem.svg", bgcolor="white")
+t = SVGTurtle(width=800, height=800, filename="{filename}", bgcolor="white")
 t.speed(0)
 L_str = "{lstr}"
 t.drawLSystem(L_str, {length}, {angle}, {iterations})
@@ -242,7 +243,7 @@ t.save_svg()
             self.ui.ruleC.setText(data.get("ruleC", ""))
             self.ui.ruleD.setText(data.get("ruleD", ""))
             self.ui.ruleE.setText(data.get("ruleE", ""))
-            self.ui.ruleF.setText(data.get("ruleF", ""))
+            self.ui.filename.setText(data.get("filename", "lsystem.svg"))
             self.current_file = Path(path)
             self._update_title()
         except Exception as e:
@@ -263,7 +264,7 @@ t.save_svg()
                 "ruleC": self.ui.ruleC.text(),
                 "ruleD": self.ui.ruleD.text(),
                 "ruleE": self.ui.ruleE.text(),
-                "ruleF": self.ui.ruleF.text(),
+                "filename": self.ui.filename.text(),
             }
             self.current_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
             self._update_title()
@@ -322,12 +323,3 @@ t.save_svg()
             event.accept()
         else:
             event.ignore()
-
-    def load_stylesheet(self, file_path):
-        css_path = Path.joinpath(self.rootDir, "css", file_path)
-        try:
-            with open(css_path, "r", encoding="utf-8") as file:
-                stylesheet = file.read()
-                self.setStyleSheet(stylesheet)
-        except FileNotFoundError:
-            print(f"CSS file '{css_path}' not found")

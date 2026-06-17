@@ -26,7 +26,7 @@ class Ui_LTurtleWindow(object):
     def setupUi(self, LTurtleWindow):
         if not LTurtleWindow.objectName():
             LTurtleWindow.setObjectName(u"LTurtleWindow")
-        LTurtleWindow.resize(700, 577)
+        LTurtleWindow.resize(700, 614)
         self.actionNew = QAction(LTurtleWindow)
         self.actionNew.setObjectName(u"actionNew")
         self.actionOpen = QAction(LTurtleWindow)
@@ -141,10 +141,10 @@ class Ui_LTurtleWindow(object):
 
         self.gridLayout.addWidget(self.ruleA, 5, 1, 1, 1)
 
-        self.ruleF = QLineEdit(self.LSystemForm)
-        self.ruleF.setObjectName(u"ruleF")
+        self.filename = QLineEdit(self.LSystemForm)
+        self.filename.setObjectName(u"filename")
 
-        self.gridLayout.addWidget(self.ruleF, 10, 1, 1, 1)
+        self.gridLayout.addWidget(self.filename, 10, 1, 1, 1)
 
         self.axiom = QLineEdit(self.LSystemForm)
         self.axiom.setObjectName(u"axiom")
@@ -165,7 +165,7 @@ class Ui_LTurtleWindow(object):
         self.iterationen.setObjectName(u"iterationen")
         self.iterationen.setMinimum(2)
         self.iterationen.setMaximum(100)
-        self.iterationen.setValue(5)
+        self.iterationen.setValue(20)
 
         self.gridLayout.addWidget(self.iterationen, 2, 1, 1, 1)
 
@@ -217,10 +217,10 @@ class Ui_LTurtleWindow(object):
 
         self.gridLayout.addWidget(self.ruleC, 7, 1, 1, 1)
 
-        self.label_rule_f = QLabel(self.LSystemForm)
-        self.label_rule_f.setObjectName(u"label_rule_f")
+        self.label_filename = QLabel(self.LSystemForm)
+        self.label_filename.setObjectName(u"label_filename")
 
-        self.gridLayout.addWidget(self.label_rule_f, 10, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_filename, 10, 0, 1, 1)
 
         self.label_rules_header = QLabel(self.LSystemForm)
         self.label_rules_header.setObjectName(u"label_rules_header")
@@ -275,11 +275,12 @@ class Ui_LTurtleWindow(object):
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.consoleOutput = QPlainTextEdit(self.widget22)
         self.consoleOutput.setObjectName(u"consoleOutput")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(1)
         sizePolicy2.setHeightForWidth(self.consoleOutput.sizePolicy().hasHeightForWidth())
         self.consoleOutput.setSizePolicy(sizePolicy2)
+        self.consoleOutput.setMinimumSize(QSize(0, 100))
         self.consoleOutput.setAcceptDrops(False)
         self.consoleOutput.setStyleSheet(u"background:#ffffff;")
         self.consoleOutput.setUndoRedoEnabled(False)
@@ -297,8 +298,6 @@ class Ui_LTurtleWindow(object):
         self.menubar.setGeometry(QRect(0, 0, 700, 33))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
-        self.menuEdit = QMenu(self.menubar)
-        self.menuEdit.setObjectName(u"menuEdit")
         self.menuRun = QMenu(self.menubar)
         self.menuRun.setObjectName(u"menuRun")
         LTurtleWindow.setMenuBar(self.menubar)
@@ -307,7 +306,6 @@ class Ui_LTurtleWindow(object):
         LTurtleWindow.setStatusBar(self.statusbar)
 
         self.menubar.addAction(self.menuFile.menuAction())
-        self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuRun.menuAction())
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionOpen)
@@ -315,11 +313,6 @@ class Ui_LTurtleWindow(object):
         self.menuFile.addAction(self.actionSave_As)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
-        self.menuEdit.addAction(self.actionCut)
-        self.menuEdit.addAction(self.actionCopy)
-        self.menuEdit.addAction(self.actionPaste)
-        self.menuEdit.addSeparator()
-        self.menuEdit.addAction(self.actionSelect_All)
         self.menuRun.addAction(self.actionRun)
         self.menuRun.addAction(self.actionStop)
 
@@ -380,7 +373,8 @@ class Ui_LTurtleWindow(object):
         self.label_rule_d.setText(QCoreApplication.translate("LTurtleWindow", u"Rule D:", None))
         self.ruleA.setText(QCoreApplication.translate("LTurtleWindow", u"X > X+YF+", None))
         self.ruleA.setPlaceholderText(QCoreApplication.translate("LTurtleWindow", u"e.g., A", None))
-        self.ruleF.setPlaceholderText("")
+        self.filename.setText(QCoreApplication.translate("LTurtleWindow", u"lsystem.svg", None))
+        self.filename.setPlaceholderText(QCoreApplication.translate("LTurtleWindow", u"e.g., lsystem.svg", None))
         self.axiom.setText(QCoreApplication.translate("LTurtleWindow", u"X", None))
         self.ruleE.setPlaceholderText("")
         self.label_rule_c.setText(QCoreApplication.translate("LTurtleWindow", u"Rule C:", None))
@@ -393,7 +387,7 @@ class Ui_LTurtleWindow(object):
         self.label_iterations.setText(QCoreApplication.translate("LTurtleWindow", u"Iterationen:", None))
         self.label_angle.setText(QCoreApplication.translate("LTurtleWindow", u"Winkel (\u00b0):", None))
         self.ruleC.setPlaceholderText("")
-        self.label_rule_f.setText(QCoreApplication.translate("LTurtleWindow", u"Rule F:", None))
+        self.label_filename.setText(QCoreApplication.translate("LTurtleWindow", u"Dateiname:", None))
         self.label_rules_header.setText(QCoreApplication.translate("LTurtleWindow", u"Regeln: muss > beinhalten", None))
         self.ruleD.setPlaceholderText("")
         self.label_rule_b.setText(QCoreApplication.translate("LTurtleWindow", u"Rule B:", None))
@@ -401,7 +395,6 @@ class Ui_LTurtleWindow(object):
         self.codeEditor.setPlaceholderText(QCoreApplication.translate("LTurtleWindow", u"Final code shows up here ...", None))
         self.consoleOutput.setPlaceholderText(QCoreApplication.translate("LTurtleWindow", u"Console output...", None))
         self.menuFile.setTitle(QCoreApplication.translate("LTurtleWindow", u"&Datei", None))
-        self.menuEdit.setTitle(QCoreApplication.translate("LTurtleWindow", u"&Bearbeiten", None))
         self.menuRun.setTitle(QCoreApplication.translate("LTurtleWindow", u"&Run", None))
     # retranslateUi
 

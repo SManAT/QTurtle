@@ -42,8 +42,41 @@ if _python_dll.exists():
     _runtime_includes.append((str(_python_dll), f"runtime/python{ver}.dll"))
 
 
+# --- PySide6 slimming configuration -------------------------------------
+# QTurtle only imports QtWidgets / QtGui / QtCore / QtPrintSupport.  cx_Freeze's
+# PySide6 hook copies the *entire* PySide6 tree (every Qt module, all plugins
+# and ~30 UI translations), so we prune the unused parts after the build.
+
+# Keep only these UI languages; every other Qt .qm translation is dropped.
+KEEP_TRANSLATIONS = ("de", "en")
+
+# Qt6 feature DLLs the app never loads (QML engine, PDF viewer, OpenGL,
+# networking, virtual keyboard, SVG rendering).
+PRUNE_QT_DLLS = (
+    "Qt6Quick", "Qt6Qml", "Qt6QmlModels", "Qt6QmlMeta", "Qt6QmlWorkerScript",
+    "Qt6Pdf", "Qt6PdfQuick", "Qt6PdfWidgets",
+    "Qt6OpenGL", "Qt6Network", "Qt6VirtualKeyboard", "Qt6Svg",
+)
+
+# Python binding modules (.pyd) that are never imported.
+PRUNE_QT_PYDS = ("QtNetwork",)
+
+# Whole plugin folders that are unused (no networking, QML, touch or IME).
+PRUNE_PLUGIN_DIRS = (
+    "tls", "networkinformation", "platforminputcontexts",
+    "iconengines", "generic",
+)
+
+# Inside these kept plugin folders, only the listed files survive.
+KEEP_PLUGINS = {
+    "platforms": ("qwindows.dll",),                       # the only Windows QPA backend we need
+    "imageformats": ("qico.dll", "qjpeg.dll", "qgif.dll"),  # app icon + common pixmaps
+}
+
+
 class BuildExe(_build_exe):
-    """Custom build_exe that mirrors the Tcl/Tk data into runtime/.
+    """Custom build_exe that mirrors the Tcl/Tk data into runtime/ and prunes
+    the unused PySide6 payload.
 
     cx_Freeze places the (version-matched) Tcl/Tk data files under
     <build>/share/tcl8.6 and share/tk8.6 for the main executable.  Our
@@ -67,6 +100,51 @@ class BuildExe(_build_exe):
         else:
             print(f"  WARNING: {src} not found; tkinter/turtle may not work in subprocesses")
 
+        self._slim_pyside6(out / "lib" / "PySide6")
+
+    @staticmethod
+    def _slim_pyside6(root: Path) -> None:
+        """Delete the Qt modules, plugins and translations QTurtle never uses."""
+        if not root.is_dir():
+            print(f"  WARNING: {root} not found; skipping PySide6 slimming")
+            return
+
+        freed = 0
+
+        def remove(path: Path) -> None:
+            nonlocal freed
+            if path.is_file():
+                freed += path.stat().st_size
+                path.unlink()
+            elif path.is_dir():
+                freed += sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
+                shutil.rmtree(path)
+
+        # Drop translations for unwanted languages (e.g. qtbase_zh_CN.qm -> "zh").
+        translations = root / "translations"
+        if translations.is_dir():
+            for qm in translations.glob("*.qm"):
+                _, _, lang = qm.stem.partition("_")
+                if lang.split("_", 1)[0] not in KEEP_TRANSLATIONS:
+                    remove(qm)
+
+        for name in PRUNE_QT_DLLS:
+            remove(root / f"{name}.dll")
+        for name in PRUNE_QT_PYDS:
+            remove(root / f"{name}.pyd")
+
+        for sub in PRUNE_PLUGIN_DIRS:
+            remove(root / "plugins" / sub)
+
+        for sub, keep in KEEP_PLUGINS.items():
+            plugin_dir = root / "plugins" / sub
+            if plugin_dir.is_dir():
+                for entry in plugin_dir.iterdir():
+                    if entry.name not in keep:
+                        remove(entry)
+
+        print(f"  Slimmed PySide6: freed {freed / 1024 / 1024:.1f} MB")
+
 
 build_exe_options = {
     "packages": [
@@ -86,6 +164,9 @@ build_exe_options = {
     "include_files": [
         ("src/qturtle_app/css", "lib/qturtle_app/css"),
         ("src/qturtle_app/ui/Ui_MainWindow.ui", "lib/qturtle_app/ui/Ui_MainWindow.ui"),
+        # Window/taskbar icon: the app looks for it at <package>.parent/assets,
+        # which is lib/assets in the frozen build (qturtle_app lives in lib/).
+        ("src/assets", "lib/assets"),
         *_runtime_includes,
     ],
     "excludes": [
