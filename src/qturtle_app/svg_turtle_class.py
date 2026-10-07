@@ -8,8 +8,7 @@ Example:
 from qturtle.svg_turtle_class import SVGTurtle
 
 # Turtle erstellen und konfigurieren
-t = SVGTurtle(width=400, height=400, filename="01_square.svg", bgcolor="lightblue")
-t.shape("turtle")
+t = SVGTurtle(width=400, height=400, filename="01_square.svg")
 t.color("green")
 t.speed(3)
 
@@ -27,11 +26,13 @@ import os
 
 try:
     from turtle import Turtle as _BaseTurtle
+
     _TURTLE_AVAILABLE = True
 except Exception as _turtle_import_error:
     _BaseTurtle = None  # type: ignore[assignment,misc]
     _TURTLE_AVAILABLE = False
     import sys as _sys
+
     print(f"Warning: turtle animation unavailable ({_turtle_import_error})", file=_sys.stderr)
 
 from svg_turtle import SvgTurtle
@@ -51,6 +52,11 @@ class SVG_Turtle_Output:
 
         self.svg = SvgTurtle(width, height)
 
+        bgcolor = params.get("bgcolor")
+        if bgcolor is None:
+            bgcolor = "white"
+        self.svg.getscreen().bgcolor(bgcolor)
+
     def __del__(self):
         """Auto-save SVG when object is destroyed"""
         try:
@@ -61,7 +67,7 @@ class SVG_Turtle_Output:
     def save_svg(self):
         """Save SVG file and display in cell"""
         self.svg.save_as(self.filename)
-        print(f"💾 SVG saved to: {self.filename}")
+        print(f"SVG saved to: {self.filename}")
 
     def penup(self):
         self.svg.penup()
@@ -113,7 +119,7 @@ class SVG_Turtle_Output:
         self.svg.end_fill()
 
     def speed(self, speed=None):
-        pass
+        return self.svg.speed(speed)
 
     def dot(self, size=None, *color):
         if size is None:
@@ -147,6 +153,199 @@ class SVG_Turtle_Output:
                 self.svg.width(width)
             except AttributeError:
                 pass
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Aliase
+    # ------------------------------------------------------------------
+    def fd(self, distance):
+        self.svg.fd(distance)
+
+    def bk(self, distance):
+        self.svg.bk(distance)
+
+    def back(self, distance):
+        self.svg.back(distance)
+
+    def rt(self, angle):
+        self.svg.rt(angle)
+
+    def lt(self, angle):
+        self.svg.lt(angle)
+
+    def pu(self):
+        self.svg.pu()
+
+    def up(self):
+        self.svg.up()
+
+    def pd(self):
+        self.svg.pd()
+
+    def down(self):
+        self.svg.down()
+
+    def seth(self, to_angle):
+        self.svg.seth(to_angle)
+
+    def setpos(self, x, y=None):
+        if y is None and hasattr(x, "__iter__"):
+            x, y = x
+        self.svg.setpos(x, y)
+
+    def setposition(self, x, y=None):
+        if y is None and hasattr(x, "__iter__"):
+            x, y = x
+        self.svg.setposition(x, y)
+
+    def teleport(self, x, y=None, *, fill_gap=False):
+        if y is None and hasattr(x, "__iter__"):
+            x, y = x
+        self.svg.teleport(x, y, fill_gap=fill_gap)
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Positions- und Statusabfragen
+    # ------------------------------------------------------------------
+    def pos(self):
+        return self.svg.pos()
+
+    def position(self):
+        return self.svg.position()
+
+    def xcor(self):
+        return self.svg.xcor()
+
+    def ycor(self):
+        return self.svg.ycor()
+
+    def heading(self):
+        return self.svg.heading()
+
+    def distance(self, x, y=None):
+        if y is None and hasattr(x, "__iter__"):
+            x, y = x
+        return self.svg.distance(x, y)
+
+    def towards(self, x, y=None):
+        if y is None and hasattr(x, "__iter__"):
+            x, y = x
+        return self.svg.towards(x, y)
+
+    def isdown(self):
+        return self.svg.isdown()
+
+    def isvisible(self):
+        return self.svg.isvisible()
+
+    def filling(self):
+        return self.svg.filling()
+
+    def setx(self, x):
+        self.svg.setx(x)
+
+    def sety(self, y):
+        self.svg.sety(y)
+
+    def degrees(self, fullcircle=360.0):
+        self.svg.degrees(fullcircle)
+
+    def radians(self):
+        self.svg.radians()
+
+    def pen(self, pen=None, **pendict):
+        return self.svg.pen(pen, **pendict)
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Sichtbarkeit und Form
+    # ------------------------------------------------------------------
+    def shape(self, name=None):
+        return self.svg.shape(name)
+
+    def hideturtle(self):
+        self.svg.hideturtle()
+
+    def ht(self):
+        self.svg.ht()
+
+    def showturtle(self):
+        self.svg.showturtle()
+
+    def st(self):
+        self.svg.st()
+
+    def shapesize(self, stretch_wid=None, stretch_len=None, outline=None):
+        return self.svg.shapesize(stretch_wid, stretch_len, outline)
+
+    def turtlesize(self, stretch_wid=None, stretch_len=None, outline=None):
+        return self.svg.turtlesize(stretch_wid, stretch_len, outline)
+
+    def resizemode(self, rmode=None):
+        return self.svg.resizemode(rmode)
+
+    def shearfactor(self, shear=None):
+        return self.svg.shearfactor(shear)
+
+    def shapetransform(self, t11=None, t12=None, t21=None, t22=None):
+        return self.svg.shapetransform(t11, t12, t21, t22)
+
+    def tilt(self, angle):
+        self.svg.tilt(angle)
+
+    def tiltangle(self, angle=None):
+        return self.svg.tiltangle(angle)
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Reset, Undo und Stempel
+    # ------------------------------------------------------------------
+    def reset(self):
+        self.svg.reset()
+
+    def clear(self):
+        self.svg.clear()
+
+    def undo(self):
+        self.svg.undo()
+
+    def setundobuffer(self, size):
+        self.svg.setundobuffer(size)
+
+    def undobufferentries(self):
+        return self.svg.undobufferentries()
+
+    def stamp(self):
+        return self.svg.stamp()
+
+    def clearstamp(self, stampid):
+        self.svg.clearstamp(stampid)
+
+    def clearstamps(self, n=None):
+        self.svg.clearstamps(n)
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Polygone
+    # ------------------------------------------------------------------
+    def begin_poly(self):
+        self.svg.begin_poly()
+
+    def end_poly(self):
+        self.svg.end_poly()
+
+    def get_poly(self):
+        return self.svg.get_poly()
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Sonstiges
+    # ------------------------------------------------------------------
+    def clone(self):
+        return self.svg.clone()
+
+    def getpen(self):
+        return self.svg.getpen()
+
+    def getscreen(self):
+        return self.svg.getscreen()
+
+    def getturtle(self):
+        return self.svg.getturtle()
 
     # Your extended methods
     def toRad(self, w):
@@ -196,19 +395,23 @@ class SVGTurtle:
     Use like a regular turtle, but get both animated display and SVG output.
     """
 
-    def __init__(self, width=400, height=400, filename="output.svg", bgcolor="lightblue"):
+    def __init__(self, width=400, height=400, filename="output.svg", bgcolor="white"):
         self.filename = filename
         try:
             self.turtle = _BaseTurtle() if _TURTLE_AVAILABLE else None
         except Exception as e:
             import sys as _sys
+
             print(f"Warning: could not create turtle window ({e})", file=_sys.stderr)
             self.turtle = None
 
         # Set up SVG_Turtle for export first (creates svg directory and sets final path)
-        self.svg_turtle = SVG_Turtle_Output({"filename": filename, "size": (width, height)})
+        self.svg_turtle = SVG_Turtle_Output({"filename": filename, "size": (width, height), "bgcolor": bgcolor})
 
         # Reset turtle to original origin and state
+        if bgcolor and self.turtle:
+            self.turtle.getscreen().bgcolor(bgcolor)
+
         self.home()
         self.pendown()
 
@@ -302,8 +505,9 @@ class SVGTurtle:
         self.svg_turtle.end_fill()
 
     def speed(self, speed=None):
-        if speed is not None and self.turtle:
-            self.turtle.speed(speed)
+        if self.turtle:
+            return self.turtle.speed(speed)
+        return self.svg_turtle.speed(speed)
 
     def dot(self, size=None, *color):
         if self.turtle:
@@ -322,9 +526,10 @@ class SVGTurtle:
             self.turtle.write(text, move, align, font)
         self.svg_turtle.write(text, move, align, font)
 
-    def shape(self, name):
+    def shape(self, name=None):
         if self.turtle:
             self.turtle.shape(name)
+        return self.svg_turtle.shape(name)
 
     def pensize(self, width=None):
         if width is None:
@@ -347,6 +552,281 @@ class SVGTurtle:
                 except AttributeError:
                     pass
             self.svg_turtle.width(width)
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Aliase
+    # ------------------------------------------------------------------
+    def fd(self, distance):
+        self.forward(distance)
+
+    def bk(self, distance):
+        self.backward(distance)
+
+    def back(self, distance):
+        self.backward(distance)
+
+    def rt(self, angle):
+        self.right(angle)
+
+    def lt(self, angle):
+        self.left(angle)
+
+    def pu(self):
+        self.penup()
+
+    def up(self):
+        self.penup()
+
+    def pd(self):
+        self.pendown()
+
+    def down(self):
+        self.pendown()
+
+    def seth(self, to_angle):
+        self.setheading(to_angle)
+
+    def setpos(self, x, y=None):
+        self.goto(x, y)
+
+    def setposition(self, x, y=None):
+        self.goto(x, y)
+
+    def teleport(self, x, y=None, *, fill_gap=False):
+        if y is None and hasattr(x, "__iter__"):
+            x, y = x
+        if self.turtle:
+            self.turtle.teleport(x, y, fill_gap=fill_gap)
+        self.svg_turtle.teleport(x, y, fill_gap=fill_gap)
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Positions- und Statusabfragen
+    # ------------------------------------------------------------------
+    def pos(self):
+        if self.turtle:
+            return self.turtle.pos()
+        return self.svg_turtle.pos()
+
+    def position(self):
+        return self.pos()
+
+    def xcor(self):
+        if self.turtle:
+            return self.turtle.xcor()
+        return self.svg_turtle.xcor()
+
+    def ycor(self):
+        if self.turtle:
+            return self.turtle.ycor()
+        return self.svg_turtle.ycor()
+
+    def heading(self):
+        if self.turtle:
+            return self.turtle.heading()
+        return self.svg_turtle.heading()
+
+    def distance(self, x, y=None):
+        if y is None and hasattr(x, "__iter__"):
+            x, y = x
+        if self.turtle:
+            return self.turtle.distance(x, y)
+        return self.svg_turtle.distance(x, y)
+
+    def towards(self, x, y=None):
+        if y is None and hasattr(x, "__iter__"):
+            x, y = x
+        if self.turtle:
+            return self.turtle.towards(x, y)
+        return self.svg_turtle.towards(x, y)
+
+    def isdown(self):
+        if self.turtle:
+            return self.turtle.isdown()
+        return self.svg_turtle.isdown()
+
+    def isvisible(self):
+        if self.turtle:
+            return self.turtle.isvisible()
+        return self.svg_turtle.isvisible()
+
+    def filling(self):
+        if self.turtle:
+            return self.turtle.filling()
+        return self.svg_turtle.filling()
+
+    def setx(self, x):
+        if self.turtle:
+            self.turtle.setx(x)
+        self.svg_turtle.setx(x)
+
+    def sety(self, y):
+        if self.turtle:
+            self.turtle.sety(y)
+        self.svg_turtle.sety(y)
+
+    def degrees(self, fullcircle=360.0):
+        if self.turtle:
+            self.turtle.degrees(fullcircle)
+        self.svg_turtle.degrees(fullcircle)
+
+    def radians(self):
+        if self.turtle:
+            self.turtle.radians()
+        self.svg_turtle.radians()
+
+    def pen(self, pen=None, **pendict):
+        if self.turtle:
+            self.turtle.pen(pen, **pendict)
+        return self.svg_turtle.pen(pen, **pendict)
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Sichtbarkeit und Form
+    # ------------------------------------------------------------------
+    def hideturtle(self):
+        if self.turtle:
+            self.turtle.hideturtle()
+        self.svg_turtle.hideturtle()
+
+    def ht(self):
+        self.hideturtle()
+
+    def showturtle(self):
+        if self.turtle:
+            self.turtle.showturtle()
+        self.svg_turtle.showturtle()
+
+    def st(self):
+        self.showturtle()
+
+    def shapesize(self, stretch_wid=None, stretch_len=None, outline=None):
+        if self.turtle:
+            self.turtle.shapesize(stretch_wid, stretch_len, outline)
+        return self.svg_turtle.shapesize(stretch_wid, stretch_len, outline)
+
+    def turtlesize(self, stretch_wid=None, stretch_len=None, outline=None):
+        return self.shapesize(stretch_wid, stretch_len, outline)
+
+    def resizemode(self, rmode=None):
+        if self.turtle:
+            self.turtle.resizemode(rmode)
+        return self.svg_turtle.resizemode(rmode)
+
+    def shearfactor(self, shear=None):
+        if self.turtle:
+            self.turtle.shearfactor(shear)
+        return self.svg_turtle.shearfactor(shear)
+
+    def shapetransform(self, t11=None, t12=None, t21=None, t22=None):
+        if self.turtle:
+            self.turtle.shapetransform(t11, t12, t21, t22)
+        return self.svg_turtle.shapetransform(t11, t12, t21, t22)
+
+    def tilt(self, angle):
+        if self.turtle:
+            self.turtle.tilt(angle)
+        self.svg_turtle.tilt(angle)
+
+    def tiltangle(self, angle=None):
+        if self.turtle:
+            return self.turtle.tiltangle(angle)
+        return self.svg_turtle.tiltangle(angle)
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Reset, Undo und Stempel
+    # ------------------------------------------------------------------
+    def reset(self):
+        if self.turtle:
+            self.turtle.reset()
+        self.svg_turtle.reset()
+
+    def clear(self):
+        if self.turtle:
+            self.turtle.clear()
+        self.svg_turtle.clear()
+
+    def undo(self):
+        if self.turtle:
+            self.turtle.undo()
+        self.svg_turtle.undo()
+
+    def setundobuffer(self, size):
+        if self.turtle:
+            self.turtle.setundobuffer(size)
+        self.svg_turtle.setundobuffer(size)
+
+    def undobufferentries(self):
+        if self.turtle:
+            return self.turtle.undobufferentries()
+        return self.svg_turtle.undobufferentries()
+
+    def stamp(self):
+        if self.turtle:
+            self.turtle.stamp()
+        return self.svg_turtle.stamp()
+
+    def clearstamp(self, stampid):
+        if self.turtle:
+            self.turtle.clearstamp(stampid)
+        self.svg_turtle.clearstamp(stampid)
+
+    def clearstamps(self, n=None):
+        if self.turtle:
+            self.turtle.clearstamps(n)
+        self.svg_turtle.clearstamps(n)
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Polygone
+    # ------------------------------------------------------------------
+    def begin_poly(self):
+        if self.turtle:
+            self.turtle.begin_poly()
+        self.svg_turtle.begin_poly()
+
+    def end_poly(self):
+        if self.turtle:
+            self.turtle.end_poly()
+        self.svg_turtle.end_poly()
+
+    def get_poly(self):
+        if self.turtle:
+            return self.turtle.get_poly()
+        return self.svg_turtle.get_poly()
+
+    # ------------------------------------------------------------------
+    # Original turtle-API: Sonstiges
+    # ------------------------------------------------------------------
+    def clone(self):
+        if self.turtle:
+            self.turtle.clone()
+        return self.svg_turtle.clone()
+
+    def getpen(self):
+        if self.turtle:
+            return self.turtle.getpen()
+        return self.svg_turtle.getpen()
+
+    def getscreen(self):
+        if self.turtle:
+            return self.turtle.getscreen()
+        return self.svg_turtle.getscreen()
+
+    def getturtle(self):
+        return self
+
+    # ------------------------------------------------------------------
+    # Ereignisse (nur fuer die animierte turtle, SVG ist statisch)
+    # ------------------------------------------------------------------
+    def onclick(self, fun, btn=1, add=None):
+        if self.turtle:
+            self.turtle.onclick(fun, btn, add)
+
+    def onrelease(self, fun, btn=1, add=None):
+        if self.turtle:
+            self.turtle.onrelease(fun, btn, add)
+
+    def ondrag(self, fun, btn=1, add=None):
+        if self.turtle:
+            self.turtle.ondrag(fun, btn, add)
 
     def save_svg(self):
         """Save the SVG file and display in current cell"""

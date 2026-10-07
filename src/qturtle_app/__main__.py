@@ -2,7 +2,7 @@ import sys
 import os
 from pathlib import Path
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QFont, QPixmap, QTextCharFormat
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMessageBox
 from qturtle_app.lib.responsive_window import ResponsiveMainWindow
@@ -25,8 +25,7 @@ DEFAULT_CODE = """\
 from qturtle_app.svg_turtle_class import SVGTurtle
 
 # Turtle erstellen und konfigurieren
-t = SVGTurtle(width=400, height=400, filename=\"01_square.svg\", bgcolor=\"lightblue\")
-t.shape(\"turtle\")
+t = SVGTurtle(width=400, height=400, filename=\"01_square.svg\")
 t.color(\"green\")
 t.speed(3)
 
@@ -37,6 +36,8 @@ for i in range(4):
 
 t.save_svg()
 """
+
+AUTOSAVE_INTERVAL_MS = 10_000
 
 
 class MainWindow(ResponsiveMainWindow):
@@ -72,6 +73,11 @@ class MainWindow(ResponsiveMainWindow):
         # Connect editor signals
         self.ui.codeEditor.document().modificationChanged.connect(self._on_modification_changed)
         self.ui.codeEditor.cursorPositionChanged.connect(self._update_status_bar)
+
+        # Autosave open files every few seconds
+        self.autosave_timer = QTimer(self)
+        self.autosave_timer.timeout.connect(self._autosave)
+        self.autosave_timer.start(AUTOSAVE_INTERVAL_MS)
 
         self._update_title()
 
@@ -183,6 +189,17 @@ class MainWindow(ResponsiveMainWindow):
 
         self.current_file = Path(path)
         return self.save_file()
+
+    def _autosave(self):
+        """Silently save the current file without dialogs."""
+        if self.current_file is None or not self.ui.codeEditor.document().isModified():
+            return
+        try:
+            self.current_file.write_text(self.ui.codeEditor.toPlainText(), encoding="utf-8")
+            self.ui.codeEditor.document().setModified(False)
+            self.statusBar().showMessage(f"Autosaved: {self.current_file}", 3000)
+        except Exception:
+            pass
 
     def _maybe_save(self):
         if not self.ui.codeEditor.document().isModified():

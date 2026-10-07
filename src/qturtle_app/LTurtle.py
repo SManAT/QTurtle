@@ -100,6 +100,11 @@ class LTurtleWindow(ResponsiveMainWindow):
         self.loader_timer = QtCore.QTimer()
         self.loader_timer.timeout.connect(self._update_loader_animation)
 
+        # Autosave open files every 10 seconds
+        self.autosave_timer = QtCore.QTimer()
+        self.autosave_timer.timeout.connect(self._autosave)
+        self.autosave_timer.start(10_000)
+
         # Setup script runner
         self.runner = ScriptRunner(self)
         self.runner.output_received.connect(self._on_runner_output)
@@ -249,24 +254,36 @@ t.save_svg()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open file: {e}")
 
+    def _collect_lsystem_data(self):
+        return {
+            "angle": self.ui.winkel.value(),
+            "iterations": self.ui.iterationen.value(),
+            "length": self.ui.laenge.value(),
+            "axiom": self.ui.axiom.text(),
+            "ruleA": self.ui.ruleA.text(),
+            "ruleB": self.ui.ruleB.text(),
+            "ruleC": self.ui.ruleC.text(),
+            "ruleD": self.ui.ruleD.text(),
+            "ruleE": self.ui.ruleE.text(),
+            "filename": self.ui.filename.text(),
+        }
+
+    def _autosave(self):
+        """Silently save the current file without dialogs."""
+        if self.current_file is None:
+            return
+        try:
+            self.current_file.write_text(json.dumps(self._collect_lsystem_data(), indent=2), encoding="utf-8")
+            self.ui.statusbar.showMessage(f"Autosaved: {self.current_file}", 3000)
+        except Exception:
+            pass
+
     def save_file(self):
         if self.current_file is None:
             return self.save_file_as()
 
         try:
-            data = {
-                "angle": self.ui.winkel.value(),
-                "iterations": self.ui.iterationen.value(),
-                "length": self.ui.laenge.value(),
-                "axiom": self.ui.axiom.text(),
-                "ruleA": self.ui.ruleA.text(),
-                "ruleB": self.ui.ruleB.text(),
-                "ruleC": self.ui.ruleC.text(),
-                "ruleD": self.ui.ruleD.text(),
-                "ruleE": self.ui.ruleE.text(),
-                "filename": self.ui.filename.text(),
-            }
-            self.current_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            self.current_file.write_text(json.dumps(self._collect_lsystem_data(), indent=2), encoding="utf-8")
             self._update_title()
             return True
         except Exception as e:

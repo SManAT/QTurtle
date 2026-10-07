@@ -1,10 +1,9 @@
 from qturtle_app.svg_turtle_class import SVGTurtle
 
 # Turtle erstellen und konfigurieren
-t = SVGTurtle(width=400, height=400, filename="01_square.svg", bgcolor="lightblue")
-t.shape("turtle")
+t = SVGTurtle(width=400, height=400, filename="01_square.svg")
 t.color("green")
-t.speed(3)
+t.speed(3)dddhhh
 
 # Quadrat zeichnen
 for i in range(4):
