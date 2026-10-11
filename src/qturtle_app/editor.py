@@ -199,9 +199,11 @@ class CodeEditor(QPlainTextEdit):
     def keyPressEvent(self, event):
         # Only real typing restarts the auto-format timer.  Shortcuts such as
         # Ctrl+Z must not, otherwise undoing a format would be reformatted again.
-        if event.text() and not event.modifiers() & (
-            Qt.KeyboardModifier.ControlModifier | Qt.KeyboardModifier.AltModifier
-        ):
+        # On Windows AltGr arrives as Ctrl+Alt, so Ctrl+Alt with text is real
+        # typing (e.g. AltGr+9 -> ']'); Ctrl or Alt alone means a shortcut.
+        ctrl = bool(event.modifiers() & Qt.KeyboardModifier.ControlModifier)
+        alt = bool(event.modifiers() & Qt.KeyboardModifier.AltModifier)
+        if event.text() and not (ctrl ^ alt):
             self._auto_format_timer.start()
 
         if event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
@@ -216,8 +218,10 @@ class CodeEditor(QPlainTextEdit):
         elif event.key() == Qt.Key.Key_F5:
             self.run_requested.emit()
             return
-        elif event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+        elif ctrl and not alt:
             # Handle zoom: Ctrl++ and Ctrl+-
+            # AltGr arrives as Ctrl+Alt and must never trigger zoom, so that
+            # AltGr+9 types ']' on German keyboards.
             key = event.key()
             text = event.text()
 

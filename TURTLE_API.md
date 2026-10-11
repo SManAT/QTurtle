@@ -23,6 +23,36 @@ Regeln:
 - Definitionen im Skript selbst überschreiben gleichnamige Addon-Funktionen.
 - Tippfehler-Hinweise ("Meintest du ...?") schlagen auch Addon-Funktionen vor.
 
+## Punkte und Vektoren (Addon `punkte_vektoren`)
+
+Das Addon `addons/punkte_vektoren.py` stellt Punkte und Vektoren als Zahlenpaare bereit. Intern wird numpy verwendet – im Skript ist davon aber nichts zu sehen, es genügen die Befehle aus dieser Tabelle. Punkte und Vektoren unterstützen `+`, `-`, `*` (mit Zahl) und den Zugriff über `P[0]` (x) und `P[1]` (y) direkt:
+
+```python
+P1 = Punkt(0, 0)
+P2 = Punkt(0, 400)
+P3 = Punkt(400, 0)
+
+r12 = P2 - P1                 # Richtungsvektor von P1 nach P2
+print(P1[0], P1[1])           # x- und y-Koordinate
+```
+
+| Befehl | Signatur | Beschreibung | Rückgabe |
+|---|---|---|---|
+| `Punkt` | `Punkt(x, y)` | Erstellt einen Punkt mit den Koordinaten `(x, y)`. | Punkt |
+| `Vektor` | `Vektor(x, y)` | Erstellt einen Vektor mit den Komponenten `(x, y)`. | Vektor |
+| `richtungsvektor` | `richtungsvektor(P1, P2)` | Berechnet den Vektor von `P1` nach `P2` (entspricht `P2 - P1`). | Vektor |
+| `vektor_add` | `vektor_add(v1, v2)` | Addiert zwei Vektoren (verschiebt auch einen Punkt um einen Vektor). | Vektor |
+| `vektor_sub` | `vektor_sub(v1, v2)` | Subtrahiert `v2` von `v1`. | Vektor |
+| `vektor_mal` | `vektor_mal(v, k)` | Multipliziert einen Vektor mit einer Zahl `k` (verlängert/verkürzt). | Vektor |
+| `skalarprodukt` | `skalarprodukt(v1, v2)` | Berechnet das Skalarprodukt zweier Vektoren. | Zahl |
+| `kreuzprodukt` | `kreuzprodukt(v1, v2)` | Berechnet das 2D-Kreuzprodukt: `0` = parallel (Punkte auf einer Geraden), `> 0` = `v2` links von `v1`, `< 0` = rechts. | Zahl |
+| `laenge` | `laenge(v)` | Berechnet die Länge (den Betrag) eines Vektors. | Zahl |
+| `abstand` | `abstand(P1, P2)` | Berechnet den Abstand zwischen zwei Punkten. | Zahl |
+| `einheitsvektor` | `einheitsvektor(v)` | Berechnet den Vektor der Länge 1 mit gleicher Richtung (Fehler beim Nullvektor). | Vektor |
+| `normalenvektor` | `normalenvektor(v)` | Berechnet den Vektor, der senkrecht auf `v` steht (90°-Drehung). | Vektor |
+| `winkel` | `winkel(v1, v2)` | Berechnet den Winkel zwischen zwei Vektoren in Grad (0–180). | Zahl |
+| `mittelpunkt` | `mittelpunkt(P1, P2)` | Berechnet den Mittelpunkt der Strecke zwischen zwei Punkten. | Punkt |
+
 ## Bewegung
 
 | Methode | Signatur | Beschreibung | Rückgabe |
