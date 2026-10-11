@@ -21,6 +21,7 @@ dependencies = [
     "pyside6-essentials>=6.4.0",
     # turtle is part of the Python standard library (needs tkinter), not a PyPI package
     "svg_turtle",
+    "black",  # code formatter for the editor (Shift+Alt+F)
 ]
 requires-python = ">=3.8"
 

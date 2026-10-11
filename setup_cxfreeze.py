@@ -3,9 +3,11 @@
 
 import atexit
 import shutil
+import subprocess
 import sys
 from pathlib import Path
-from cx_Freeze import setup, Executable
+
+from cx_Freeze import Executable, setup
 from cx_Freeze.command.build_exe import build_exe as _build_exe
 
 # Put the subprocess python.exe in runtime/ so its ._pth file does not land
@@ -42,6 +44,36 @@ if _python_dll.exists():
     _runtime_includes.append((str(_python_dll), f"runtime/python{ver}.dll"))
 
 
+# black and pytokens are compiled with mypyc.  Their compiled modules import
+# top-level modules that live directly in site-packages (not inside the
+# package): the shared runtime "<hash>__mypyc.pyd" and "_black_version.py".
+# cx_Freeze cannot see these imports, and the hash changes with every release,
+# so look the files up in the package metadata.
+def _toplevel_module_includes(*dists: str) -> list:
+    from importlib.metadata import PackageNotFoundError, files
+
+    includes = []
+    for dist in dists:
+        try:
+            dist_files = files(dist) or []
+        except PackageNotFoundError:
+            continue
+        for f in dist_files:
+            if "/" not in str(f) and f.name.endswith((".py", ".pyd")):
+                includes.append((str(f.locate()), f"lib/{f.name}"))
+    return includes
+
+
+_black_includes = _toplevel_module_includes("black", "pytokens")
+
+
+# The API reference is shipped as PDF, generated from TURTLE_API.md on every
+# build.  Runs in a subprocess because the conversion needs a QGuiApplication.
+_api_pdf = Path("build/TURTLE_API.pdf")
+_api_pdf.parent.mkdir(exist_ok=True)
+subprocess.run([sys.executable, "md_to_pdf.py", "TURTLE_API.md", str(_api_pdf)], check=True)
+
+
 # --- PySide6 slimming configuration -------------------------------------
 # QTurtle only imports QtWidgets / QtGui / QtCore / QtPrintSupport.  cx_Freeze's
 # PySide6 hook copies the *entire* PySide6 tree (every Qt module, all plugins
@@ -53,9 +85,18 @@ KEEP_TRANSLATIONS = ("de", "en")
 # Qt6 feature DLLs the app never loads (QML engine, PDF viewer, OpenGL,
 # networking, virtual keyboard, SVG rendering).
 PRUNE_QT_DLLS = (
-    "Qt6Quick", "Qt6Qml", "Qt6QmlModels", "Qt6QmlMeta", "Qt6QmlWorkerScript",
-    "Qt6Pdf", "Qt6PdfQuick", "Qt6PdfWidgets",
-    "Qt6OpenGL", "Qt6Network", "Qt6VirtualKeyboard", "Qt6Svg",
+    "Qt6Quick",
+    "Qt6Qml",
+    "Qt6QmlModels",
+    "Qt6QmlMeta",
+    "Qt6QmlWorkerScript",
+    "Qt6Pdf",
+    "Qt6PdfQuick",
+    "Qt6PdfWidgets",
+    "Qt6OpenGL",
+    "Qt6Network",
+    "Qt6VirtualKeyboard",
+    "Qt6Svg",
 )
 
 # Python binding modules (.pyd) that are never imported.
@@ -63,13 +104,16 @@ PRUNE_QT_PYDS = ("QtNetwork",)
 
 # Whole plugin folders that are unused (no networking, QML, touch or IME).
 PRUNE_PLUGIN_DIRS = (
-    "tls", "networkinformation", "platforminputcontexts",
-    "iconengines", "generic",
+    "tls",
+    "networkinformation",
+    "platforminputcontexts",
+    "iconengines",
+    "generic",
 )
 
 # Inside these kept plugin folders, only the listed files survive.
 KEEP_PLUGINS = {
-    "platforms": ("qwindows.dll",),                       # the only Windows QPA backend we need
+    "platforms": ("qwindows.dll",),  # the only Windows QPA backend we need
     "imageformats": ("qico.dll", "qjpeg.dll", "qgif.dll"),  # app icon + common pixmaps
 }
 
@@ -154,6 +198,17 @@ build_exe_options = {
         "PySide6.QtPrintSupport",
         "tkinter",
         "turtle",
+        # code formatter (contains compiled modules + grammar files).  Imports
+        # made from mypyc-compiled modules are invisible to cx_Freeze, so all
+        # of black's runtime dependencies are listed explicitly.
+        "black",
+        "blib2to3",
+        "pytokens",
+        "platformdirs",
+        "pathspec",
+        "click",
+        "packaging",
+        "mypy_extensions",
         "qturtle_app",
         "qturtle_app.editor",
         "qturtle_app.runner",
@@ -167,7 +222,14 @@ build_exe_options = {
         # Window/taskbar icon: the app looks for it at <package>.parent/assets,
         # which is lib/assets in the frozen build (qturtle_app lives in lib/).
         ("src/assets", "lib/assets"),
+        # API reference for users (PDF), placed next to QTurtle.exe
+        (str(_api_pdf), "TURTLE_API.pdf"),
+        # Addon folder next to QTurtle.exe: users drop their own .py files
+        # here; the runner loads them into every script (see runner.py,
+        # ScriptRunner._addons_dir).
+        ("addons", "addons"),
         *_runtime_includes,
+        *_black_includes,
     ],
     "excludes": [
         "PyQt6",

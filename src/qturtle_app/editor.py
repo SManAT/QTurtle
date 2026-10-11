@@ -1,9 +1,12 @@
 from PySide6.QtWidgets import QPlainTextEdit, QWidget, QTextEdit
-from PySide6.QtCore import Qt, QRect, QSize, QRegularExpression, Signal
+from PySide6.QtCore import Qt, QRect, QSize, QRegularExpression, QTimer, Signal
 from PySide6.QtGui import (
     QColor, QPainter, QTextCharFormat, QFont, QSyntaxHighlighter,
     QPalette, QTextCursor
 )
+
+# Format the code automatically after this many ms without typing
+AUTO_FORMAT_DELAY_MS = 3000
 
 
 class PythonHighlighter(QSyntaxHighlighter):
@@ -134,6 +137,13 @@ class CodeEditor(QPlainTextEdit):
         # Current line highlight color
         self._current_line_color = QColor("#F0F0F0")
 
+        # Auto-format with black after a typing pause
+        self.auto_format_enabled = True
+        self._auto_format_timer = QTimer(self)
+        self._auto_format_timer.setSingleShot(True)
+        self._auto_format_timer.setInterval(AUTO_FORMAT_DELAY_MS)
+        self._auto_format_timer.timeout.connect(self._auto_format)
+
     def line_number_area_width(self):
         digits = len(str(max(1, self.blockCount())))
         return 10 + self.fontMetrics().horizontalAdvance('9') * digits
@@ -187,6 +197,13 @@ class CodeEditor(QPlainTextEdit):
             pass  # Current line highlighting handled via QPalette selection color
 
     def keyPressEvent(self, event):
+        # Only real typing restarts the auto-format timer.  Shortcuts such as
+        # Ctrl+Z must not, otherwise undoing a format would be reformatted again.
+        if event.text() and not event.modifiers() & (
+            Qt.KeyboardModifier.ControlModifier | Qt.KeyboardModifier.AltModifier
+        ):
+            self._auto_format_timer.start()
+
         if event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
             self._handle_auto_indent()
             return
@@ -254,6 +271,47 @@ class CodeEditor(QPlainTextEdit):
             cursor.movePosition(QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.KeepAnchor, 4)
             cursor.removeSelectedText()
 
+    def format_code(self):
+        """Format the whole document with black.
+
+        Returns None on success, otherwise the error message (e.g. syntax error).
+        The change is a single undo step, so Ctrl+Z restores the original code.
+        """
+        import black  # imported lazily to keep app startup fast
+
+        source = self.toPlainText()
+        try:
+            formatted = black.format_str(source, mode=black.Mode())
+        except Exception as e:  # black.InvalidInput on syntax errors
+            return str(e)
+
+        if formatted == source:
+            return None
+
+        position = _map_position(source, formatted, self.textCursor().position())
+        scroll = self.verticalScrollBar().value()
+
+        cursor = self.textCursor()
+        cursor.beginEditBlock()
+        cursor.select(QTextCursor.SelectionType.Document)
+        cursor.insertText(formatted)
+        cursor.endEditBlock()
+
+        cursor.setPosition(min(position, len(formatted)))
+        self.setTextCursor(cursor)
+        self.verticalScrollBar().setValue(scroll)
+        return None
+
+    def _auto_format(self):
+        if not self.auto_format_enabled:
+            return
+        # Don't format while the user is on an empty (possibly indented) line,
+        # black would strip the indentation they are about to type on.
+        if not self.textCursor().block().text().strip():
+            return
+        # Half-typed code is usually not valid Python yet: ignore errors silently
+        self.format_code()
+
     def setDefaultCode(self, code: str):
         self.setPlainText(code)
         self.document().setModified(False)
@@ -281,3 +339,40 @@ class CodeEditor(QPlainTextEdit):
             event.accept()
             return
         super().wheelEvent(event)
+
+
+def _map_position(old: str, new: str, pos: int) -> int:
+    """Find the position in ``new`` that corresponds to ``pos`` in ``old``.
+
+    Formatting mostly changes whitespace, so the cursor is placed after the
+    same number of non-whitespace characters.  If the cursor was at the start
+    of a following line, it is moved to that line in the new text as well.
+    """
+    before = old[:pos]
+    gap = before[len(before.rstrip()):]  # whitespace right before the cursor
+
+    if not old[pos:].strip():
+        # Cursor behind the last code: black may have removed characters
+        # (e.g. ";"), so counting could overshoot.  Stay at the end of the code.
+        i = len(new.rstrip())
+    else:
+        count = sum(1 for c in before if not c.isspace())
+        seen = 0
+        i = 0
+        while i < len(new) and seen < count:
+            if not new[i].isspace():
+                seen += 1
+            i += 1
+
+    if "\n" in gap:
+        newline = new.find("\n", i)
+        if newline != -1:
+            i = newline + 1
+            indent = len(new[i:]) - len(new[i:].lstrip(" "))
+            if old[pos:pos + 1].strip():
+                # Cursor was right before the code of that line: skip indentation
+                i += indent
+            else:
+                column = len(gap) - gap.rfind("\n") - 1
+                i += min(column, indent)
+    return i

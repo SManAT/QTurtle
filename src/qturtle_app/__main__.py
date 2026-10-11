@@ -1,15 +1,15 @@
-import sys
 import os
+import sys
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer, Signal
-from PySide6.QtGui import QColor, QFont, QPixmap, QTextCharFormat
+from PySide6.QtCore import QSettings, Qt, QTimer, Signal
+from PySide6.QtGui import QAction, QColor, QFont, QKeySequence, QPixmap, QTextCharFormat
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMessageBox
-from qturtle_app.lib.responsive_window import ResponsiveMainWindow
-from qturtle_app.ui.Ui_MainWindow import Ui_MainWindow
-from qturtle_app.LTurtle import LTurtleWindow
 
+from qturtle_app.lib.responsive_window import ResponsiveMainWindow
+from qturtle_app.LTurtle import LTurtleWindow
 from qturtle_app.runner import ScriptRunner
+from qturtle_app.ui.Ui_MainWindow import Ui_MainWindow
 
 # Windows taskbar icon fix
 if sys.platform == "win32":
@@ -34,6 +34,9 @@ for i in range(4):
     t.forward(100)
     t.right(90)
 
+# vom addon Ordner
+stern(t)
+
 t.save_svg()
 """
 
@@ -55,8 +58,10 @@ class MainWindow(ResponsiveMainWindow):
         self.ui.setupUi(self)
         self.load_stylesheet("styles.css")
 
-        # Configure editor
-        self.ui.codeEditor.setDefaultCode(DEFAULT_CODE)
+        # Configure editor: reopen the last file, fall back to the default example
+        self.settings = QSettings("SManAT", "QTurtle")
+        if not self._open_last_file():
+            self.ui.codeEditor.setDefaultCode(DEFAULT_CODE)
 
         # Configure console output
         self._setup_console()
@@ -122,6 +127,33 @@ class MainWindow(ResponsiveMainWindow):
         # Buttons
         self.ui.btnRun.clicked.connect(self.run_script)
         self.ui.openLTurtleButton.clicked.connect(self.open_lturtle_window)
+        self._setup_format_action()
+
+    def _setup_format_action(self):
+        """Menu entry, shortcut and auto-format checkbox for black formatting."""
+        self.actionFormat = QAction("&Format Code", self)
+        self.actionFormat.setShortcut(QKeySequence("Shift+Alt+F"))
+        self.actionFormat.triggered.connect(self.format_code)
+        self.ui.menuRun.addSeparator()
+        self.ui.menuRun.addAction(self.actionFormat)
+
+        # Checkbox comes from the designer; restore the saved state (default: on)
+        self.ui.chkAutoFormat.toggled.connect(self._on_auto_format_toggled)
+        self.ui.chkAutoFormat.setChecked(self.settings.value("auto_format", True, type=bool))
+        self._on_auto_format_toggled(self.ui.chkAutoFormat.isChecked())
+
+    def _on_auto_format_toggled(self, checked):
+        self.ui.codeEditor.auto_format_enabled = checked
+        self.settings.setValue("auto_format", checked)
+
+    def format_code(self):
+        error = self.ui.codeEditor.format_code()
+        if error:
+            self.ui.consoleOutput.clear()
+            self._on_runner_error(f"Formatieren nicht möglich (Syntaxfehler):\n{error}\n")
+        else:
+            self.statusBar().showMessage("Code formatiert", 3000)
+        self.ui.codeEditor.setFocus()
 
     def _update_title(self):
         name = self.current_file.name if self.current_file else "Untitled"
@@ -161,13 +193,31 @@ class MainWindow(ResponsiveMainWindow):
             return
 
         try:
-            text = Path(path).read_text(encoding="utf-8")
-            self.ui.codeEditor.setPlainText(text)
-            self.ui.codeEditor.document().setModified(False)
-            self.current_file = Path(path)
-            self._update_title()
+            self._load_file(Path(path))
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open file: {e}")
+
+    def _load_file(self, path: Path):
+        text = path.read_text(encoding="utf-8")
+        self.ui.codeEditor.setPlainText(text)
+        self.ui.codeEditor.document().setModified(False)
+        self.current_file = path
+        self._remember_file(path)
+        self._update_title()
+
+    def _remember_file(self, path: Path):
+        self.settings.setValue("last_file", str(path))
+
+    def _open_last_file(self):
+        """Load the last opened file. Returns False if there is none or it is gone."""
+        last = self.settings.value("last_file", "")
+        if not last or not Path(last).is_file():
+            return False
+        try:
+            self._load_file(Path(last))
+            return True
+        except Exception:
+            return False
 
     def save_file(self):
         if self.current_file is None:
@@ -176,6 +226,7 @@ class MainWindow(ResponsiveMainWindow):
         try:
             self.current_file.write_text(self.ui.codeEditor.toPlainText(), encoding="utf-8")
             self.ui.codeEditor.document().setModified(False)
+            self._remember_file(self.current_file)
             self._update_title()
             return True
         except Exception as e:

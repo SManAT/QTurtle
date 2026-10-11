@@ -46,6 +46,106 @@ if 'turtle' in _qturtle_sys.modules:
     # UTF-8 encoding setup for Windows compatibility
     UTF8_PREFIX = "import sys; sys.stdout.reconfigure(encoding='utf-8'); sys.stderr.reconfigure(encoding='utf-8')\n"
 
+    # Excepthook that explains unknown commands/names in German and suggests
+    # similar ones ("Meintest du ...?"). __QTURTLE_OFFSET__ is replaced with the
+    # number of injected lines so the reported line matches the editor.
+    ERROR_HINTS = r'''
+import sys as _qturtle_sys
+
+def _qturtle_excepthook(exc_type, exc, tb, _orig=_qturtle_sys.excepthook):
+    if exc_type not in (AttributeError, NameError) or tb is None:
+        return _orig(exc_type, exc, tb)
+    try:
+        import builtins, difflib, re, textwrap, types
+
+        last = tb
+        while last.tb_next is not None:
+            last = last.tb_next
+        # Only explain errors raised directly in the student's code
+        if last.tb_frame.f_code.co_filename != __file__:
+            return _orig(exc_type, exc, tb)
+
+        name = getattr(exc, "name", None)
+        if not name:
+            match = re.search(r"(?:attribute|name) '(\w+)'", str(exc))
+            name = match.group(1) if match else None
+        if not name:
+            return _orig(exc_type, exc, tb)
+
+        line = last.tb_lineno - __QTURTLE_OFFSET__
+        out = [f"Fehler in Zeile {line}: {exc_type.__name__}: {exc}"]
+
+        if exc_type is AttributeError:
+            obj = getattr(exc, "obj", None)
+            if obj is None:
+                out.append(f"Hinweis: Den Befehl '{name}' gibt es nicht.")
+                print("\n".join(out), file=_qturtle_sys.stderr)
+                return
+            owner = obj.__name__ if isinstance(obj, types.ModuleType) else type(obj).__name__
+            candidates = {n: callable(getattr(obj, n, None)) for n in dir(obj) if not n.startswith("_")}
+            what = f"{owner} kennt den Befehl '{name}' nicht."
+        else:
+            frame = last.tb_frame
+            names = set(frame.f_locals) | set(frame.f_globals) | set(dir(builtins))
+            names = {n for n in names if not n.startswith("_")}
+            candidates = {n: callable(frame.f_locals.get(n, frame.f_globals.get(n, getattr(builtins, n, None)))) for n in names}
+            what = f"'{name}' ist nicht definiert."
+
+        def label(n):
+            return f"{n}()" if candidates[n] else n
+
+        # Case-insensitive match first (e.g. "Forward" -> "forward"), then fuzzy
+        lower = {n.lower(): n for n in candidates}
+        similar = [lower[name.lower()]] if name.lower() in lower else []
+        similar += [lower[n] for n in difflib.get_close_matches(name.lower(), lower, n=3, cutoff=0.6) if lower[n] not in similar]
+
+        if similar:
+            out.append(f"Hinweis: {what} Meintest du {' oder '.join(label(n) for n in similar[:3])}?")
+        elif exc_type is AttributeError:
+            commands = sorted(n for n in candidates if candidates[n])
+            out.append(f"Hinweis: {what} Mögliche Befehle:")
+            out.append(textwrap.fill(", ".join(f"{n}()" for n in commands), width=90, initial_indent="  ", subsequent_indent="  "))
+        else:
+            out.append(f"Hinweis: {what} Tippfehler, fehlender import oder Variable noch nicht zugewiesen?")
+        print("\n".join(out), file=_qturtle_sys.stderr)
+    except Exception:
+        _orig(exc_type, exc, tb)
+
+_qturtle_sys.excepthook = _qturtle_excepthook
+'''
+
+    # Loads every *.py file from the addons folder and copies its public
+    # functions/classes/constants into the script's global namespace, so
+    # students can call them directly without an import.
+    # __QTURTLE_ADDONS_DIR__ is replaced with the folder found by _addons_dir().
+    ADDON_LOADER = r'''
+import os as _qturtle_os, sys as _qturtle_sys, types as _qturtle_types
+import importlib.util as _qturtle_ilu
+
+_qturtle_addons_dir = __QTURTLE_ADDONS_DIR__
+if _qturtle_os.path.isdir(_qturtle_addons_dir):
+    _qturtle_sys.path.insert(0, _qturtle_addons_dir)
+    for _qturtle_file in sorted(_qturtle_os.listdir(_qturtle_addons_dir)):
+        if not _qturtle_file.endswith(".py") or _qturtle_file.startswith("_"):
+            continue
+        _qturtle_name = _qturtle_file[:-3]
+        try:
+            _qturtle_path = _qturtle_os.path.join(_qturtle_addons_dir, _qturtle_file)
+            _qturtle_spec = _qturtle_ilu.spec_from_file_location(_qturtle_name, _qturtle_path)
+            if _qturtle_spec is None or _qturtle_spec.loader is None:
+                continue
+            _qturtle_mod = _qturtle_types.ModuleType(_qturtle_name)
+            _qturtle_sys.modules[_qturtle_name] = _qturtle_mod
+            _qturtle_spec.loader.exec_module(_qturtle_mod)
+            for _n, _v in vars(_qturtle_mod).items():
+                if _n.startswith("_") or isinstance(_v, _qturtle_types.ModuleType):
+                    continue
+                globals()[_n] = _v
+        except Exception as _e:
+            print(f"Warnung: Addon '{_qturtle_file}' konnte nicht geladen werden: {_e}",
+                  file=_qturtle_sys.stderr)
+'''
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._process = None
@@ -72,7 +172,8 @@ if 'turtle' in _qturtle_sys.modules:
         uses_turtle = "import turtle" in code or "from turtle" in code or "SVGTurtle" in code or "svg_turtle" in code
 
         # Build final code with UTF-8 setup and turtle epilog
-        full_code = self.UTF8_PREFIX
+        full_code = self.UTF8_PREFIX + self.ERROR_HINTS
+        full_code += self.ADDON_LOADER.replace("__QTURTLE_ADDONS_DIR__", repr(str(self._addons_dir())))
         if uses_turtle:
             full_code += "\n" + self.TURTLE_TRACKING
             full_code += """
@@ -85,6 +186,7 @@ _qturtle_t.Turtle.fd = _qturtle_track_forward
 _qturtle_t.Turtle.bk = _qturtle_track_backward
 _qturtle_t.Turtle.back = _qturtle_track_backward
 """
+        full_code = full_code.replace("__QTURTLE_OFFSET__", str(full_code.count("\n")))
         full_code += code
         if uses_turtle:
             full_code += "\n" + self.TURTLE_EPILOG
@@ -147,6 +249,23 @@ _qturtle_t.Turtle.back = _qturtle_track_backward
         except Exception as e:
             self.error_received.emit(f"Failed to start process: {e}")
             self._process = None
+
+    @staticmethod
+    def _addons_dir() -> Path:
+        """Folder with user-provided *.py files loaded into every script.
+
+        In a frozen build the folder sits next to the app executable, so
+        users can drop files there without touching the package. In source
+        runs it is the repo root's addons/ folder.
+        """
+        if getattr(sys, "frozen", False):
+            if hasattr(sys, "_MEIPASS"):
+                base = Path(sys._MEIPASS)  # pyright: ignore[reportAttributeAccessIssue]
+            else:
+                base = Path(sys.executable).parent
+        else:
+            base = Path(__file__).resolve().parent.parent.parent
+        return base / "addons"
 
     @staticmethod
     def _find_python() -> str:

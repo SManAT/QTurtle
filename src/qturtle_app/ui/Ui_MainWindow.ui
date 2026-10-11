@@ -66,6 +66,61 @@ font-size: 12px;</string>
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="chkAutoFormat">
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="Accent">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>112</red>
+              <green>112</green>
+              <blue>112</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="Accent">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>112</red>
+              <green>112</green>
+              <blue>112</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="Accent">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>112</red>
+              <green>112</green>
+              <blue>112</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
+        </property>
+        <property name="toolTip">
+         <string>Code automatisch formatieren, wenn 3 Sekunden nichts getippt wird
+(manuell: Shift+Alt+F)</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">margin-left: 15px;
+font-size: 12px;</string>
+        </property>
+        <property name="text">
+         <string>Auto-Format</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>

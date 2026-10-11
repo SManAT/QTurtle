@@ -16,10 +16,10 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QMainWindow, QMenu,
-    QMenuBar, QPlainTextEdit, QPushButton, QSizePolicy,
-    QSpacerItem, QSplitter, QStatusBar, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QHBoxLayout, QMainWindow,
+    QMenu, QMenuBar, QPlainTextEdit, QPushButton,
+    QSizePolicy, QSpacerItem, QSplitter, QStatusBar,
+    QVBoxLayout, QWidget)
 
 from qturtle_app.editor import CodeEditor
 
@@ -73,6 +73,27 @@ class Ui_MainWindow(object):
 "font-size: 12px;")
 
         self.horizontalLayout.addWidget(self.btnRun)
+
+        self.chkAutoFormat = QCheckBox(self.centralwidget)
+        self.chkAutoFormat.setObjectName(u"chkAutoFormat")
+        palette = QPalette()
+        brush = QBrush(QColor(112, 112, 112, 255))
+        brush.setStyle(Qt.BrushStyle.SolidPattern)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+        palette.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.Accent, brush)
+#endif
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+        palette.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.Accent, brush)
+#endif
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+        palette.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Accent, brush)
+#endif
+        self.chkAutoFormat.setPalette(palette)
+        self.chkAutoFormat.setStyleSheet(u"margin-left: 15px;\n"
+"font-size: 12px;")
+        self.chkAutoFormat.setChecked(True)
+
+        self.horizontalLayout.addWidget(self.chkAutoFormat)
 
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
@@ -184,6 +205,11 @@ class Ui_MainWindow(object):
         self.actionStop.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+F2", None))
 #endif // QT_CONFIG(shortcut)
         self.btnRun.setText(QCoreApplication.translate("MainWindow", u"Run Script", None))
+#if QT_CONFIG(tooltip)
+        self.chkAutoFormat.setToolTip(QCoreApplication.translate("MainWindow", u"Code automatisch formatieren, wenn 3 Sekunden nichts getippt wird\n"
+"(manuell: Shift+Alt+F)", None))
+#endif // QT_CONFIG(tooltip)
+        self.chkAutoFormat.setText(QCoreApplication.translate("MainWindow", u"Auto-Format", None))
         self.openLTurtleButton.setText(QCoreApplication.translate("MainWindow", u"Open L Turtle", None))
         self.consoleOutput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Console output...", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"&Datei", None))
