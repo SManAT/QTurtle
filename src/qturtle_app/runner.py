@@ -185,6 +185,10 @@ _qturtle_t.Turtle.backward = _qturtle_track_backward
 _qturtle_t.Turtle.fd = _qturtle_track_forward
 _qturtle_t.Turtle.bk = _qturtle_track_backward
 _qturtle_t.Turtle.back = _qturtle_track_backward
+_qturtle_t.Turtle.getX = _qturtle_t.Turtle.xcor
+_qturtle_t.Turtle.getY = _qturtle_t.Turtle.ycor
+_qturtle_t.Turtle.setX = _qturtle_t.Turtle.setx
+_qturtle_t.Turtle.setY = _qturtle_t.Turtle.sety
 """
         full_code = full_code.replace("__QTURTLE_OFFSET__", str(full_code.count("\n")))
         full_code += code

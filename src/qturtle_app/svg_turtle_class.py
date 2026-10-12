@@ -214,6 +214,12 @@ class SVG_Turtle_Output:
     def xcor(self):
         return self.svg.xcor()
 
+    def getX(self):
+        return self.svg.xcor()
+
+    def getY(self):
+        return self.svg.ycor()
+
     def ycor(self):
         return self.svg.ycor()
 
@@ -243,6 +249,12 @@ class SVG_Turtle_Output:
         self.svg.setx(x)
 
     def sety(self, y):
+        self.svg.sety(y)
+
+    def setX(self, x):
+        self.svg.setx(x)
+
+    def setY(self, y):
         self.svg.sety(y)
 
     def degrees(self, fullcircle=360.0):
@@ -620,6 +632,12 @@ class SVGTurtle:
             return self.turtle.ycor()
         return self.svg_turtle.ycor()
 
+    def getX(self):
+        return self.xcor()
+
+    def getY(self):
+        return self.ycor()
+
     def heading(self):
         if self.turtle:
             return self.turtle.heading()
@@ -663,6 +681,12 @@ class SVGTurtle:
         if self.turtle:
             self.turtle.sety(y)
         self.svg_turtle.sety(y)
+
+    def setX(self, x):
+        self.setx(x)
+
+    def setY(self, y):
+        self.sety(y)
 
     def degrees(self, fullcircle=360.0):
         if self.turtle:

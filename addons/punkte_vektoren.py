@@ -107,6 +107,26 @@ def winkel(v1, v2):
     return float(_np.degrees(_np.arccos(cos)))
 
 
+def getX(P):
+    """Gibt die x-Koordinate eines Punktes zurück.
+
+    Beispiel:
+        P = Punkt(30, 40)
+        x = getX(P)   # 30.0
+    """
+    return float(_np.asarray(P, dtype=float)[0])
+
+
+def getY(P):
+    """Gibt die y-Koordinate eines Punktes zurück.
+
+    Beispiel:
+        P = Punkt(30, 40)
+        y = getY(P)   # 40.0
+    """
+    return float(_np.asarray(P, dtype=float)[1])
+
+
 def mittelpunkt(P1, P2):
     """Berechnet den Mittelpunkt der Strecke zwischen zwei Punkten."""
     P1 = _np.asarray(P1, dtype=float)

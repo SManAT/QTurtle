@@ -2,6 +2,7 @@
 
 Gültig für `turtle.Turtle` (Python-Standardbibliothek) und `qturtle_app.svg_turtle_class.SVGTurtle`.
 Positionen sind Koordinatenpaare `(x, y)`, Winkel in Grad (Standard: 360), `0°` zeigt nach Osten.
+Die camelCase-Varianten `getX`, `getY`, `setX` und `setY` sind QTurtle-Erweiterungen: `SVGTurtle` kennt sie direkt, und beim Start aus QTurtle heraus werden sie auch an `turtle.Turtle` angehängt. Außerhalb von QTurtle (in einem normalen Python) stehen nur die Standardnamen (`xcor`, `ycor`, `setx`, `sety`) zur Verfügung.
 
 ## Addons: eigene Befehle
 
@@ -52,6 +53,8 @@ print(P1[0], P1[1])           # x- und y-Koordinate
 | `normalenvektor` | `normalenvektor(v)` | Berechnet den Vektor, der senkrecht auf `v` steht (90°-Drehung). | Vektor |
 | `winkel` | `winkel(v1, v2)` | Berechnet den Winkel zwischen zwei Vektoren in Grad (0–180). | Zahl |
 | `mittelpunkt` | `mittelpunkt(P1, P2)` | Berechnet den Mittelpunkt der Strecke zwischen zwei Punkten. | Punkt |
+| `getX` | `getX(P)` | Liefert die x-Koordinate eines Punktes (entspricht `P[0]`). | Zahl |
+| `getY` | `getY(P)` | Liefert die y-Koordinate eines Punktes (entspricht `P[1]`). | Zahl |
 
 ## Bewegung
 
@@ -61,9 +64,9 @@ print(P1[0], P1[1])           # x- und y-Koordinate
 | `backward` / `bk` / `back` | `backward(distance)` | Bewegt die Turtle um `distance` rückwärts, ohne die Richtung zu ändern. | – |
 | `right` / `rt` | `right(angle)` | Dreht die Turtle um `angle` nach rechts (im Uhrzeigersinn). | – |
 | `left` / `lt` | `left(angle)` | Dreht die Turtle um `angle` nach links (gegen den Uhrzeigersinn). | – |
-| `goto` / `setpos` / `setposition` | `goto(x, y=None)` – akzeptiert auch `(x, y)`-Tupel | Bewegt die Turtle direkt zur angegebenen Position. | – |
-| `setx` | `setx(x)` | Setzt die x-Koordinate, y bleibt gleich. | – |
-| `sety` | `sety(y)` | Setzt die y-Koordinate, x bleibt gleich. | – |
+| `goto` / `setpos` / `setposition` | `goto(x, y=None)` – akzeptiert auch `(x, y)`-Tupel und Punkte/Vektoren (z.B. `goto(P1)` aus dem Addon `punkte_vektoren`) | Bewegt die Turtle direkt zur angegebenen Position. | – |
+| `setx` / `setX` | `setx(x)` | Setzt die x-Koordinate, y bleibt gleich. | – |
+| `sety` / `setY` | `sety(y)` | Setzt die y-Koordinate, x bleibt gleich. | – |
 | `teleport` | `teleport(x, y=None, *, fill_gap=False)` | Springt zur Position, ohne eine Linie zu zeichnen. | – |
 | `home` | `home()` | Bewegt die Turtle zum Ursprung `(0, 0)` und richtet sie nach Osten aus. | – |
 | `circle` | `circle(radius, extent=None, steps=None)` | Zeichnet einen Kreis bzw. Kreisbogen (`extent` in Grad) oder ein Vieleck (`steps`). | – |
@@ -78,8 +81,8 @@ print(P1[0], P1[1])           # x- und y-Koordinate
 | Methode | Signatur | Beschreibung | Rückgabe |
 |---|---|---|---|
 | `pos` / `position` | `pos()` | Liefert die aktuelle Position. | `(x, y)` |
-| `xcor` | `xcor()` | Liefert die aktuelle x-Koordinate. | `x` |
-| `ycor` | `ycor()` | Liefert die aktuelle y-Koordinate. | `y` |
+| `xcor` / `getX` | `xcor()` | Liefert die aktuelle x-Koordinate. | `x` |
+| `ycor` / `getY` | `ycor()` | Liefert die aktuelle y-Koordinate. | `y` |
 | `heading` | `heading()` | Liefert die aktuelle Blickrichtung. | Winkel in Grad |
 | `distance` | `distance(x, y=None)` | Berechnet den Abstand zu einem Punkt oder einer anderen Turtle. | Distanz |
 | `towards` | `towards(x, y=None)` | Berechnet den Winkel von der Turtle zum Zielpunkt. | Winkel zum Ziel |
