@@ -56,6 +56,27 @@ print(P1[0], P1[1])           # x- und y-Koordinate
 | `getX` | `getX(P)` | Liefert die x-Koordinate eines Punktes (entspricht `P[0]`). | Zahl |
 | `getY` | `getY(P)` | Liefert die y-Koordinate eines Punktes (entspricht `P[1]`). | Zahl |
 
+## Bezier-Kurven (Addon `bezier`)
+
+Das Addon `addons/bezier.py` berechnet quadratische Bezier-Kurven (2. Grades) durch drei Punkte: Startpunkt `P1`, Kontrollpunkt `P2` und Endpunkt `P3` (jeweils Zahlenpaare, z.B. aus dem Addon `punkte_vektoren`). `unterteilungen` legt fest, aus wie vielen Punkten die Kurve zusammengesetzt wird.
+
+```python
+P1 = Punkt(0, 0)
+P2 = Punkt(1, 1)
+P3 = Punkt(4, 2)
+
+punkte = getBezierPunkte(P1, P2, P3, 50)
+for P in punkte:
+    goto(P)
+```
+
+| Befehl | Signatur | Beschreibung | Rückgabe |
+|---|---|---|---|
+| `getBezierPunkte` | `getBezierPunkte(P1, P2, P3, unterteilungen)` | Berechnet die Punkte einer Bezier-Kurve von `P1` über Kontrollpunkt `P2` nach `P3` (`unterteilungen + 1` Punkte, inklusive Start und Ende). | Liste von `[x, y]` |
+| `calcBezier` | `calcBezier(P1, P2, P3, unterteilungen)` | Berechnet dieselben Punkte und gibt sie mit zugehörigem `t` in der Konsole aus (zum Testen, ohne Rückgabe). | – |
+
+Die interne Funktion `_bezier` ist privat (führender Unterstrich) und steht im Skript nicht zur Verfügung.
+
 ## Bewegung
 
 | Methode | Signatur | Beschreibung | Rückgabe |
