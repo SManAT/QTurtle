@@ -202,6 +202,7 @@ build_exe_options = {
         # made from mypyc-compiled modules are invisible to cx_Freeze, so all
         # of black's runtime dependencies are listed explicitly.
         "black",
+        "numpy",
         "blib2to3",
         "pytokens",
         "platformdirs",
