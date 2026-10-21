@@ -90,7 +90,7 @@ Die interne Funktion `_bezier` ist privat (führender Unterstrich) und steht im 
 | `sety` / `setY` | `sety(y)` | Setzt die y-Koordinate, x bleibt gleich. | – |
 | `teleport` | `teleport(x, y=None, *, fill_gap=False)` | Springt zur Position, ohne eine Linie zu zeichnen. | – |
 | `home` | `home()` | Bewegt die Turtle zum Ursprung `(0, 0)` und richtet sie nach Osten aus. | – |
-| `circle` | `circle(radius, extent=None, steps=None)` | Zeichnet einen Kreis bzw. Kreisbogen (`extent` in Grad) oder ein Vieleck (`steps`). | – |
+| `circle` | `circle(radius, extent=None, steps=None)` oder `circle(P, radius, steps=None)` mit `P = [x, y]` | Zeichnet einen Kreis bzw. Kreisbogen (`extent` in Grad) oder ein Vieleck (`steps`). Wird ein Mittelpunkt `P = [x, y]` übergeben (Liste, Tupel oder `Punkt(x, y)` aus dem Addon `punkte_vektoren`), zeichnet die Turtle einen vollen Kreis um diesen Punkt; Position, Richtung und Stiftzustand der Turtle bleiben danach unverändert. Beispiel: `P = [100, 50]` gefolgt von `t.circle(P, 40)`. | – |
 | `dot` | `dot(size=None, *color)` | Zeichnet einen gefüllten Punkt mit Durchmesser `size` an der aktuellen Position. | – |
 | `stamp` | `stamp()` | Stempelt die Turtle-Form an der aktuellen Position auf die Zeichenfläche. | stamp_id |
 | `clearstamp` | `clearstamp(stampid)` | Entfernt den Stempel mit der angegebenen ID. | – |

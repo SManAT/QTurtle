@@ -99,12 +99,34 @@ class SVG_Turtle_Output:
         self.svg.home()
 
     def circle(self, radius, angle=None, steps=None):
+        if hasattr(radius, "__iter__") and not isinstance(radius, str):
+            if angle is None:
+                raise ValueError("circle(P, radius): radius fehlt (P = [x, y])")
+            self._circle_centered(radius, angle, steps)
+            return
         if angle is None and steps is None:
             self.svg.circle(radius)
         elif steps is None:
             self.svg.circle(radius, angle)
         else:
             self.svg.circle(radius, angle, steps)
+
+    def _circle_centered(self, center, radius, steps=None):
+        """Vollen Kreis um den Mittelpunkt P=[x, y] zeichnen, danach Zustand wiederherstellen"""
+        x, y = center
+        old_pos = self.svg.pos()
+        old_heading = self.svg.heading()
+        pen_was_down = self.svg.isdown()
+        self.svg.penup()
+        self.svg.goto(x, y - radius)
+        self.svg.setheading(0)
+        self.svg.pendown()
+        self.circle(radius, steps=steps)
+        self.svg.penup()
+        self.svg.goto(*old_pos)
+        self.svg.setheading(old_heading)
+        if pen_was_down:
+            self.svg.pendown()
 
     def fillcolor(self, *args):
         self.svg.fillcolor(*args)
@@ -475,6 +497,11 @@ class SVGTurtle:
         self.svg_turtle.home()
 
     def circle(self, radius, angle=None, steps=None):
+        if hasattr(radius, "__iter__") and not isinstance(radius, str):
+            if angle is None:
+                raise ValueError("circle(P, radius): radius fehlt (P = [x, y])")
+            self._circle_centered(radius, angle, steps)
+            return
         if self.turtle:
             if angle is None and steps is None:
                 self.turtle.circle(radius)
@@ -489,6 +516,23 @@ class SVGTurtle:
             self.svg_turtle.circle(radius, angle)
         else:
             self.svg_turtle.circle(radius, angle, steps)
+
+    def _circle_centered(self, center, radius, steps=None):
+        """Vollen Kreis um den Mittelpunkt P=[x, y] zeichnen, danach Zustand wiederherstellen"""
+        x, y = center
+        old_pos = self.pos()
+        old_heading = self.heading()
+        pen_was_down = self.isdown()
+        self.penup()
+        self.goto(x, y - radius)
+        self.setheading(0)
+        self.pendown()
+        self.circle(radius, steps=steps)
+        self.penup()
+        self.goto(old_pos)
+        self.setheading(old_heading)
+        if pen_was_down:
+            self.pendown()
 
     def color(self, *args):
         if self.turtle:

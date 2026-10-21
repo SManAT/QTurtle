@@ -1,7 +1,9 @@
+import colorsys
+
 from qturtle_app.svg_turtle_class import SVGTurtle
 
 # Turtle erstellen und konfigurieren (bgcolor = Hintergrundfarbe der Grafik)
-t = SVGTurtle(width=400, height=400, filename="Bsp2_Gerade.svg", bgcolor="white")
+t = SVGTurtle(width=400, height=400, filename="Bsp2_GeometrieStern.svg")
 t.speed(3)
 
 
@@ -14,33 +16,28 @@ def drawPunkte_Lines(P1, P2, P3):
     t.goto(P3)
 
 
+def regenbogen(anteil):
+    """Farbe aus dem Farbkreis: anteil 0.0 = rot ... 1.0 = wieder rot"""
+    r, g, b = colorsys.hsv_to_rgb(anteil % 1.0, 1.0, 0.9)
+    return "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
+
+
 def drawGitter(P1, P2, P3):
     # Richtungsvektoren bestimmen
     r12 = (P2 - P1) / unterteilungen
     r13 = (P1 - P3) / unterteilungen
     # Verbindungen zeichnen
     for i in range(0, unterteilungen):
+        # jede Linie bekommt ihre eigene Regenbogenfarbe
+        t.pencolor(regenbogen(i / unterteilungen))
         # gerade Linien
         t.teleport(P1 + r12 * (i + 1))
         t.goto(P3 + r13 * i)
 
 
-def drawFlaeche(P1, P2, P3, farbe):
-    """Dreieck P1-P2-P3 als farbige Fläche füllen"""
-    t.fillcolor(farbe)
-    t.begin_fill()
-    # Nur goto verwenden: Der Pfad muss lückenlos und geschlossen sein
-    t.teleport(P1)
-    t.goto(P2)
-    t.goto(P3)
-    t.goto(P1)
-    t.end_fill()
-
-
-def theL(P1, P2, P3, farbe):
+def theL(P1, P2, P3):
     """Zeichne einen Quadranten mit den Vektorlinien"""
     # Erst die Fläche, dann die Linien darüber
-    drawFlaeche(P1, P2, P3, farbe)
     drawPunkte_Lines(P1, P2, P3)
     drawGitter(P1, P2, P3)
 
@@ -50,9 +47,9 @@ if __name__ == "__main__":
     L = 250
     unterteilungen = 40
     # 4 Quadranten, jeweils mit eigener Farbe
-    theL(Punkt(0, 0), Punkt(0, L), Punkt(L, 0), "cornflowerblue")
-    theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, L), "mediumseagreen")
-    theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, -L), "lightcoral")
-    theL(Punkt(0, 0), Punkt(L, 0), Punkt(0, -L), "gold")
+    theL(Punkt(0, 0), Punkt(0, L), Punkt(L, 0))
+    theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, L))
+    theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, -L))
+    theL(Punkt(0, 0), Punkt(L, 0), Punkt(0, -L))
 
     t.save_svg()
