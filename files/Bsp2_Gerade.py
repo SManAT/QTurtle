@@ -4,12 +4,8 @@ from qturtle_app.svg_turtle_class import SVGTurtle
 t = SVGTurtle(width=400, height=400, filename="Bsp2_Gerade.svg")
 t.speed(3)
 
-P1 = Punkt(0, 0)
-P2 = Punkt(0, 300)
-P3 = Punkt(300, 0)
 
-
-def drawPunkte_Lines():
+def drawPunkte_Lines(P1, P2, P3):
     """Punkte Verbinden"""
     t.teleport(P1)
     t.goto(P2)
@@ -17,9 +13,8 @@ def drawPunkte_Lines():
     t.goto(P3)
 
 
-def drawGitter():
+def drawGitter(P1, P2, P3):
     # Richtungsvektoren bestimmen
-    unterteilungen = 40
     r12 = (P2 - P1) / unterteilungen
     r13 = (P1 - P3) / unterteilungen
     # Verbindungen zeichnen
@@ -29,8 +24,20 @@ def drawGitter():
         t.goto(P3 + r13 * i)
 
 
-# Hauptprogramm --------------------------------------
-drawPunkte_Lines()
-drawGitter()
+def theL(P1, P2, P3):
+    """Zeichne einen Qudranten mit den Vektorlinien"""
+    drawPunkte_Lines(P1, P2, P3)
+    drawGitter(P1, P2, P3)
 
-t.save_svg()
+
+# Hauptprogramm --------------------------------------
+if __name__ == "__main__":
+    L = 250
+    unterteilungen = 40
+    # 1 Quadrant
+    theL(Punkt(0, 0), Punkt(0, L), Punkt(L, 0))
+    theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, L))
+    theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, -L))
+    theL(Punkt(0, 0), Punkt(L, 0), Punkt(0, -L))
+
+    t.save_svg()
