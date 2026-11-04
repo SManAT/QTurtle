@@ -47,7 +47,7 @@ if __name__ == "__main__":
     L = 250
     unterteilungen = 40
     # 4 Quadranten, jeweils mit eigener Farbe
-    theL(Punkt(0, 0), Punkt(0, L), Punkt(L, 0))
+    theL(Punkt(0, 0), Punkt(L, 0), Punkt(0, L))
     theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, L))
     theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, -L))
     theL(Punkt(0, 0), Punkt(L, 0), Punkt(0, -L))
