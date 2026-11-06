@@ -36,9 +36,8 @@ def singleQuadrate(L):
 
 def theQuadrate(L, unterteilungen):
     """Zeichne immer kleiner werdende Quadrate"""
-    for i in range(0, unterteilungen):
-        singleQuadrate(L)
-        L *= 1 - i / unterteilungen
+    for i in range(0, unterteilungen + 1):
+        singleQuadrate(L * i / unterteilungen)
 
 
 def theLines(L, unterteilungen):

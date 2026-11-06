@@ -33,11 +33,11 @@ def theL(P1, P2, P3):
 # Hauptprogramm --------------------------------------
 if __name__ == "__main__":
     L = 250
-    unterteilungen = 40
+    unterteilungen = 3
     # 1 Quadrant
     theL(Punkt(0, 0), Punkt(0, L), Punkt(L, 0))
-    theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, L))
-    theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, -L))
-    theL(Punkt(0, 0), Punkt(L, 0), Punkt(0, -L))
+    # theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, L))
+    # theL(Punkt(0, 0), Punkt(-L, 0), Punkt(0, -L))
+    # theL(Punkt(0, 0), Punkt(L, 0), Punkt(0, -L))
 
     t.save_svg()

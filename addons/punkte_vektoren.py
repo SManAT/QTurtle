@@ -134,6 +134,14 @@ def mittelpunkt(P1, P2):
     return (P1 + P2) / 2
 
 
+def equalPkt(P1, P2):
+    """sind die Punkte gleich"""
+    if getX(P1) == getX(P2) and getY(P1) == getY(P2):
+        return True
+    else:
+        return False
+
+
 if __name__ == "__main__":
     P1 = Punkt(0, 0)
     P2 = Punkt(0, 400)

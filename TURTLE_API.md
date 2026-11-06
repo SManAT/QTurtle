@@ -128,6 +128,27 @@ Die interne Funktion `_bezier` ist privat (führender Unterstrich) und steht im 
 | `end_fill` | `end_fill()` | Beendet die Füllung und füllt die gezeichnete Form. | – |
 | `setundobuffer` | `setundobuffer(size)` | Legt fest, wie viele Aktionen rückgängig gemacht werden können (`None` deaktiviert). | – |
 
+### Farben
+
+Farben werden überall dort akzeptiert, wo eine Farbe erwartet wird (`pencolor`, `fillcolor`, `color`, `dot`, `bgcolor`, `createFilledCircle`). Eine Farbe kann auf vier Arten angegeben werden:
+
+| Form | Beispiel | Bedeutung |
+|---|---|---|
+| Farbname | `pencolor("red")` | Benannte Farbe als String, z.B. `"blue"`, `"lightgreen"`, `"gold"`; Groß-/Kleinschreibung ist egal |
+| Hex-String | `pencolor("#ff0000")` oder `pencolor("#f00")` | `#RRGGBB` (6-stellig) oder `#RGB` (3-stellige Kurzform) |
+| RGB als einzelne Argumente | `pencolor(1.0, 0.0, 0.0)` | drei Zahlen für Rot, Grün, Blau |
+| RGB als Tupel | `pencolor((1.0, 0.0, 0.0))` | dieselben drei Werte als ein Tupel |
+
+```python
+t.pencolor("red")              # Farbname
+t.pencolor("#ff0000")          # Hex, 6-stellig
+t.pencolor("#f00")             # Hex, 3-stellig (Kurzform)
+t.fillcolor(0.0, 0.0, 1.0)     # RGB als einzelne Argumente
+t.color("gold", "#00ff00")     # Pen- und Füllfarbe in einem Aufruf
+```
+
+Der Wertebereich der RGB-Zahlen hängt vom `colormode` ab: Standard ist `1.0`, die Werte liegen also zwischen `0.0` und `1.0` (`pencolor(1.0, 0.0, 0.0)` ist Rot). Nach `getscreen().colormode(255)` sind Werte von `0` bis `255` erlaubt (`pencolor(255, 0, 0)`).
+
 ## Ausrichtung und Winkel
 
 | Methode | Signatur | Beschreibung | Rückgabe |
